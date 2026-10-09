@@ -1,4 +1,4 @@
-# NOVIDADES 🆕
+# NOVIDADES 💫
 
 * 🎰 **Novo evento de cassino**
 
