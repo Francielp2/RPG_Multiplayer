@@ -1,6 +1,8 @@
 from time import sleep
 from rich.table import Table
 from rich import print
+
+import som
 from interface.funcoes import mostrar_mensagem
 from jogador import Jogador
 class Combate :
@@ -57,16 +59,10 @@ class Combate :
         if agitot > 10 :
             d10 = self.jog.d10()
             danotot = self.jog.danotot(d10,d20)
-            texto = f"{self.alvo.nome} perdeu [bold]{danotot} de HP![/]"
-            texto += f"\n{self.alvo.nome} HP: {self.alvo.hp} -> "
-            self.alvo.hp -= danotot
-            texto += f"{self.alvo.hp}"
-            mostrar_mensagem(mensagem=texto,
-                             titulo="COMBATE⚔️",estilo="red",
-                             largura=35,pausa=0.7)
-            sleep(1.8)
+            self.alvo.receber_dano(danotot,combate=True)
 
         else :
+            som.errou_ataque()
             mostrar_mensagem(mensagem="[bold]ERROU O DANO[/]",titulo=":(",estilo="red")
 
         return True

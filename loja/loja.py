@@ -1,17 +1,20 @@
+from rich.columns import Columns
 from rich.panel import Panel
 
+from equipamento.armadura import Armadura
 from equipamento import Equipamento
 from interface.funcoes import mostrar_mensagem, limpar_tela
 from jogador import Jogador
-from random import randint
+from random import randint,random
 from time import sleep
 from rich import print
 from rich.table import Table
+import som
 class Loja:
     def __init__(self):
         self.estoque: list[Equipamento] = []
         self.slot = 3
-        self.preco_slot = 3
+        self.preco_slot = 2
         self.turno = 1
 
     def entrar_loja(self,jog:Jogador):
@@ -32,13 +35,17 @@ class Loja:
         return True
 
     def novo_equip(self):
-        if randint(0,1) == 0 :
+        chance = random()
+        if chance < 0.60 :
             equip = Equipamento.gerarArma(self.turno)
-        else :
+        elif chance < 0.90 :
             equip = Equipamento.gerarAnel(self.turno)
+        else :
+            equip = Armadura.gerarArmadura(self.turno)
         self.estoque.append(equip)
 
     def att_loja(self):
+        som.attloja.play()
         mostrar_mensagem("❇️LOJA ATUALIZADA!❇️",
                          estilo="#FFF300",titulo="LOJA")
         self.estoque = []
@@ -46,33 +53,54 @@ class Loja:
             self.novo_equip()
 
     def chance_att_loja(self) :
-        fim = 3
-        if self.turno == 20 :
-            print("50% de chance da loja atualizar!")
-            sleep(1)
-        if self.turno >= 20 :
-            fim = 2 #mais chance de att loja
-        chance = randint(1,fim)
-        if chance == 1 :
+        chance = random()
+        if chance < 0.38 :
             self.att_loja()
         return
 
     def mostrar_loja(self,jog:Jogador):
-        tabela = Table(title="[#FFF300] ▣ LOJA ▣ [/] ")
-        tabela.add_column("#") #indice
-        tabela.add_column("Nome")
-        tabela.add_column("Dano",style="red")
-        tabela.add_column("Agilidade",style="blue")
-        tabela.add_column("Preço",style="#FFF300")
+        tabelaarma = Table(title="[#FFF300] ⚔️ ARMAS⚔️ [/] ")
+        tabelaarma.add_column("#") #indice
+        tabelaarma.add_column("Nome")
+        tabelaarma.add_column("Dano", style="red")
+        tabelaarma.add_column("Agilidade", style="blue")
+        tabelaarma.add_column("Preço", style="#FFF300")
+
+
+        tabelaanel = Table(title="[blue]ANEIS[/]")
+        tabelaanel.add_column("#")  # indice
+        tabelaanel.add_column("Nome")
+        tabelaanel.add_column("Dano", style="red")
+        tabelaanel.add_column("Agilidade", style="blue")
+        tabelaanel.add_column("Preço", style="#FFF300")
+
+        tabelaarmadura = Table(title="ARMADURAS")
+        tabelaarmadura.add_column("#")  # indice
+        tabelaarmadura.add_column("Nome")
+        tabelaarmadura.add_column("Defesa",style="steel_blue")
+        tabelaarmadura.add_column("Preço", style="#FFF300")
 
         if self.estoque :
             for i, e in enumerate (self.estoque) : # e-> equipamento
-                tabela.add_row(str(i),
-                               str(e.nome),
-                               str(e.dano),
-                               str(e.agilidade),
-                               str(e.valor),)
-            print(tabela)
+                if e.tipo =="arma" :
+                    tabelaarma.add_row(str(i),
+                                       str(e),
+                                       str(e.dano),
+                                       str(e.agilidade),
+                                       str(e.valor), )
+                elif e.tipo == "anel" :
+                    tabelaanel.add_row(str(i),
+                                       str(e),
+                                       str(e.dano),
+                                       str(e.agilidade),
+                                       str(e.valor), )
+                elif e.tipo == "armadura" :
+                    tabelaarmadura.add_row(str(i),
+                                           str(e),
+                                           str(e.defesa),
+                                           str(e.valor))
+            print(Columns([tabelaarma,tabelaanel,tabelaarmadura]))
+
         else :
             mostrar_mensagem(mensagem="[red]Nenhum equipamento disponível na loja![/]",
                              titulo="[#FFF300] ▣ LOJA ▣ [/]",pausa=0)
@@ -106,11 +134,13 @@ class Loja:
 
         elif indice == -3 : #comprar slot na loja
             if self.tem_moeda(jog=jog,valor=self.preco_slot) :
+                som.novo_slot.play()
                 self.slot += 1
-                self.preco_slot += 2
+                self.preco_slot += 1
                 self.novo_equip()
         else :
             if self.tem_moeda(jog=jog,valor=self.estoque[indice].valor) :
+                som.compra.play()
                 jog.adicionar_item_inventario(self.estoque[indice])
                 self.estoque.remove(self.estoque[indice])
         return True
