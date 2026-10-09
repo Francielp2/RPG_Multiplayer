@@ -1,61 +1,70 @@
-# NOVIDADES 
+# NOVIDADES 🆕
 
-* 🎨 **Interface totalmente reformulada com Rich**
+* 🎰 **Novo evento de cassino**
 
-  * Painéis e tabelas para organizar as informações
-  * Cores para destacar diferentes estados do jogo
-  * Emojis e símbolos na interface
-  * Exibição dos jogadores, equipamentos, moedas e turno
+  * Jogadores podem apostar moedas durante eventos aleatórios
+  * Multiplicador aleatório entre 1.0x e 2.0x para definir a recompensa
+  * Chance de vitória influenciada pelo atributo de sorte
+  * Possibilidade de ganhar moedas ou perder o valor apostado
+  * Eventos podem envolver um jogador ou vários alvos
 
-* 💬 **Novo sistema de mensagens**
+* ⚔️ **Sistema de dano das armas reformulado**
 
-  * Mensagens exibidas linha por linha
-  * Limpeza automática do terminal para criar uma apresentação mais dinâmica
+  * O dano das armas agora influencia o valor máximo do dado de ataque
+  * O dano é definido por uma rolagem aleatória, mantendo a importância do dado durante o combate
+  * Balanceamento do sistema para evitar que armas muito fortes tornem os ataques previsíveis
 
-* ❤️ **Sistema visual de HP**
+* 🛡️ **Novo sistema de armaduras**
 
-  * HP exibido em diferentes cores de acordo com a quantidade de vida
-  * Verde para HP normal
-  * Laranja para HP entre 20 e 30
-  * Vermelho para HP abaixo de 20
+  * Armaduras possuem atributos de defesa e durabilidade
+  * Reduzem o dano recebido pelos jogadores
+  * A durabilidade diminui de acordo com a quantidade de dano absorvido
+  * Armaduras podem quebrar durante a partida
+  * Equipamentos quebrados são removidos do inventário e do slot de equipamento
+  * Armaduras possuem uma chance própria de aparecer na loja
 
-* 💍 **Novo sistema de anéis**
+* 💎 **Nomes de equipamentos de acordo com a raridade**
 
-  * Criado um gerador de anéis
-  * Anéis possuem valores de agilidade
-  * Anéis lendários e míticos também podem aumentar o dano
+  * Equipamentos agora possuem nomes definidos de acordo com sua raridade
+  * Itens comuns recebem nomes mais simples
+  * Equipamentos raros e de maior raridade recebem nomes mais marcantes
+  * Sistema aplicado às armas e aos anéis
 
-* 🍀 **Sistema de sorte**
+* 🛒 **Loja reformulada**
 
-  * Cada jogador possui um atributo de sorte
-  * A sorte influencia a probabilidade de determinados eventos
-  * Sorte pode ser aumentada durante a partida
-  * Limite máximo de sorte definido em 2.0
+  * Equipamentos organizados em tabelas separadas por categoria
+  * Exibição mais organizada das armas, anéis e armaduras disponíveis
+  * Probabilidades de aparição definidas para cada categoria de equipamento
 
-* 🎲 **Sistema de eventos aleatórios**
+* 🔊 **Novo sistema de efeitos sonoros**
 
-  * Eventos podem acontecer durante a partida
-  * Existe uma chance de um evento ocorrer ao final de cada turno
-  * Eventos podem afetar um jogador ou todos os jogadores
-  * A sorte influencia se determinados acontecimentos serão positivos ou negativos
+  * Adição de efeitos sonoros durante as ações do jogo
+  * Sons diferentes para ataques, esquivas e recebimento de dano
+  * Variações aleatórias de sons para evitar repetições constantes
+  * Efeitos sonoros associados às mensagens exibidas no terminal
+  * Sons específicos para eventos de recuperação e perda de HP
 
-  * 🪙 **Eventos de moedas**
-  
-    * Jogadores podem ganhar ou perder moedas
-    * A quantidade é baseada no turno atual
-    * O sistema impede que o jogador fique com moedas negativas
-  
-  * ❤️ **Eventos de HP**
-  
-    * Jogadores podem recuperar HP
-    * Jogadores também podem perder HP
-    * Os valores são definidos de forma aleatória com base no turno
+* 🍀 **Ajustes no sistema de sorte**
 
-* ⚖️ **Balanceamento e testes**
+  * Correção de problemas de precisão nos valores decimais da sorte
+  * Valores ajustados para evitar casas decimais desnecessárias
 
-  * Adicionados testes durante o desenvolvimento dos novos sistemas
-  * Ajustes na apresentação das mensagens e eventos
-  * Correções de erros encontrados durante os testes
+* 🎒 **Melhorias no inventário e nos equipamentos**
+
+  * Integração das armaduras ao sistema de equipamentos
+  * Exibição dos equipamentos equipados na interface
+  * Correções na identificação das armaduras no menu
+  * Ajustes na apresentação dos itens e de suas raridades
+
+* ⚖️ **Balanceamento e correções**
+
+  * Ajustes na distribuição de equipamentos da loja
+  * Correções no cálculo e na aplicação do dano
+  * Correções na durabilidade e na remoção de armaduras quebradas
+  * Melhorias na exibição de mensagens durante o combate
+  * Testes e correções de erros encontrados durante o desenvolvimento
+
+    
 
 
 # RPG-TEXTO-PYTHON🎮
