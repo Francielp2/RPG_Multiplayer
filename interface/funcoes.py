@@ -3,8 +3,8 @@ from rich.panel import Panel
 from time import sleep
 import os
 
-def limpar_tela() :
-    os.system("cls")
+def limpar_tela():
+    os.system("cls" if os.name == "nt" else "clear")
 
 def mostrar_mensagem(mensagem,titulo,pausa=0.8,largura=30,estilo="",som=None,linha_som =1) :
     linhas = mensagem.split("\n")
