@@ -26,9 +26,11 @@ class EventoAleatorio :
 
     def escolher_evento(self):
         eventos = {
-            self.moeda:35,
-            self.hp:50,
-            self.cassino:15
+            # Reserva 5% para sorte, mantendo a proporção dos eventos antigos.
+            self.moeda:33.25,
+            self.hp:47.5,
+            self.cassino:14.25,
+            self.sorte:5
 
         }
 
@@ -46,6 +48,18 @@ class EventoAleatorio :
                              pausa=2.2,largura=70)
             self.escolher_jogador()
             self.escolher_evento()
+
+    def sorte(self):
+        for jogador in self.alvo:
+            sorte_anterior = jogador.sorte
+            jogador.aumentar_sorte()
+            if jogador.sorte > sorte_anterior:
+                texto = (f"🍀 {jogador.nome} encontrou um trevo da sorte!"
+                         f"\nSorte: {sorte_anterior:.1f}x -> {jogador.sorte:.1f}x")
+            else:
+                texto = f"🍀 {jogador.nome} já está no limite de sorte (2.0x)!"
+            mostrar_mensagem(texto, titulo="EVENTO ALEATÓRIO", estilo="green",
+                             largura=70)
 
     def moeda(self):
         for jogador in self.alvo :
