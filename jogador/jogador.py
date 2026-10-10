@@ -1,4 +1,3 @@
-from os import remove
 from random import randint
 from time import sleep
 
@@ -8,6 +7,7 @@ from interface.componentes import Table
 import som
 from equipamento import Equipamento
 from equipamento.armadura import Armadura
+from equipamento.pocao import Pocao
 from interface.funcoes import mostrar_mensagem
 from rich import print
 class Jogador :
@@ -15,11 +15,14 @@ class Jogador :
         # ========= ATRIBUTOS ========
         self.nome = nome
         self.hp = hp
+        self.hp_inicial = hp
         self.danobonus = 0
         self.agilidadebonus = 0
         self.moedas = 0 #original = 0
         self.sorte = 1.0 #original = 1.0
         self.inventario = []
+        self.efeitos_pocoes = {}
+        self.cura_usada_na_rodada = False
 
         # ========= SLOTS ========
         self.arma:Equipamento = None
@@ -30,7 +33,7 @@ class Jogador :
     @property
     def agilidade(self):
         """Calcula todo o bonus de agilidade do jogador"""
-        agi = self.agilidadebonus
+        agi = self.agilidadebonus + self.bonus_pocao("agilidade")
         if self.anel :
             agi += self.anel.agilidade
         if  self.arma:
@@ -56,10 +59,27 @@ class Jogador :
         """Pega os bonus de ataque, sem contar da arma, pois o bonus da arma
         vai influenciar o dado, ele não vai somar, apenas o dano do anel e o
         bonus que vai somar"""
-        dano = self.danobonus
+        dano = self.danobonus + self.bonus_pocao("forca")
         if self.anel :
             dano += self.anel.dano
         return dano
+
+    def bonus_pocao(self, tipo):
+        efeito = self.efeitos_pocoes.get(tipo)
+        return efeito["pocao"].potencia if efeito else 0
+
+    @property
+    def sorte_total(self):
+        return round(min(2.0, self.sorte + self.bonus_pocao("sorte")), 1)
+
+    def resumo_pocoes(self):
+        if not self.efeitos_pocoes:
+            return "Nenhuma"
+        return "\n".join(
+            f"{Pocao.nomes[tipo]}: {efeito['pocao'].descricao_efeito} "
+            f"({efeito['rodadas']} rodada(s))"
+            for tipo, efeito in self.efeitos_pocoes.items()
+        )
 
     def receber_dano(self,dano,combate=False):
         if self.armadura :
@@ -100,6 +120,10 @@ class Jogador :
         if self.anel and self.anel.agilidade > 0 :
             texto += f"\n+[bold]{self.anel.agilidade}[/] Agilidade do [bold]{self.anel.nome}[/]"
             agitot += self.anel.agilidade
+        bonus = self.bonus_pocao("agilidade")
+        if bonus:
+            texto += f"\n+{bonus} Agilidade da poção 🧪"
+            agitot += bonus
         if d20 != agitot :
             texto += f"\n[bold]TOTAL = {agitot}[/]"
         mostrar_mensagem(mensagem=texto,titulo="DADO DE AGILIDADE🎲",
@@ -123,6 +147,10 @@ class Jogador :
         if self.anel and self.anel.dano > 0 :
             danotot += self.anel.dano
             texto += f"\n+{self.anel.dano} de ataque do {self.anel.nome}"
+        bonus = self.bonus_pocao("forca")
+        if bonus:
+            texto += f"\n+{bonus} de força da poção 🧪"
+            danotot += bonus
         if d20 >= 20 :
             mostrar_mensagem(mensagem="[bold red on black]ESPECIAL ATIVADO!!![/]",
                              titulo="DADO DE ATAQUE🎲", estilo="red",
@@ -139,7 +167,7 @@ class Jogador :
 
 
     def roletar_sorte(self,probabilidade=45):
-        chance = int(probabilidade * self.sorte)
+        chance = int(probabilidade * self.sorte_total)
         return randint(1,100) <= chance #retorna true ou false
 
     def aumentar_sorte(self,valor=0.1) :
@@ -159,13 +187,14 @@ class Jogador :
                              estilo="red",pausa=1.5)
             return
         while self.inventario:
-            tabela = Table(title="▤ Inventário ▤ ", width=88)
+            tabela = Table(title="▤ Inventário ▤ ", width=110, padding=(0, 1))
             tabela.add_column("#")  # index
-            tabela.add_column("Nome", ratio=2)
+            tabela.add_column("Nome", ratio=2, overflow="fold")
             tabela.add_column("Dano",style="red")
             tabela.add_column("Agilidade",style="blue")
             tabela.add_column("defesa",style="steel_blue")
             tabela.add_column("Categoria")
+            tabela.add_column("Efeito / duração", overflow="fold")
             tabela.add_column("Venda ✪", style="#FFF300")
             from partida import Partida
             for i, item in  enumerate(self.inventario) :
@@ -176,9 +205,10 @@ class Jogador :
                     str(item.agilidade if item.agilidade > 0 else " _ "),
                     str(item.defesa if item.defesa > 0 else " _ "),
                     str(item.tipo),
+                    f"{item.descricao_efeito}; {item.descricao_duracao}" if isinstance(item, Pocao) else "_",
                     str(self.preco_venda(item))
                 )
-            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "", "", "")
+            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "", "", "", "")
             print(tabela)
             arma = self.arma if self.arma else "Vazio"
             anel = self.anel if self.anel else "Vazio"
@@ -186,6 +216,7 @@ class Jogador :
             texto = f"Arma : {arma}"
             texto += f"\nAnel : {anel}"
             texto += f"\nArmadura: {armadura}"
+            texto += f"\n🧪 Poções ativas:\n{self.resumo_pocoes()}"
             painel = Panel(title="EQUIPADOS⚔️",
                            renderable=texto,width=76)
             print(painel)
@@ -195,6 +226,18 @@ class Jogador :
                 return
 
             item = self.inventario[opc]
+            if isinstance(item, Pocao):
+                acoes = (f"{item}\n{item.descricao_efeito}; {item.descricao_duracao}\n"
+                         "[green][0] 🧪 Usar[/]\n"
+                         f"[#FFF300][1] Vender por {self.preco_venda(item)} moeda(s)[/]\n"
+                         "[red][-1] ↩️ Voltar[/]")
+                print(Panel(acoes, title="🧪 AÇÕES DA POÇÃO", width=76))
+                acao = Partida.validar_opc([0, 1], "Sua opção: ")
+                if acao == 0:
+                    self.usar_pocao(item)
+                elif acao == 1:
+                    self.vender(item)
+                continue
             if isinstance(item, Equipamento):
                 acoes = (f"{item}\n"
                          "[green][0] ↑ Equipar[/]\n"
@@ -212,6 +255,10 @@ class Jogador :
 
 
     def equipar(self,item):
+        if isinstance(item, Pocao):
+            mostrar_mensagem("Poções devem ser usadas pelo inventário, não equipadas.",
+                             titulo="🧪 POÇÕES", largura=70)
+            return
         texto = ""
         if item not in self.inventario :
             mostrar_mensagem(f"{item} Não está no inventário",titulo=":/",estilo="red")
@@ -234,6 +281,52 @@ class Jogador :
         texto += f"[bold]{self.nome}[/]↑ Equipou [bold]{item}[/]"
         som.equipar.play()
         mostrar_mensagem(texto,titulo="▤ Inventário",pausa=1.3,largura=50)
+
+    def usar_pocao(self, pocao):
+        if not isinstance(pocao, Pocao) or pocao not in self.inventario or self.hp <= 0:
+            return False
+        if pocao.efeito == "cura":
+            if self.cura_usada_na_rodada:
+                mostrar_mensagem("Você já usou uma poção de cura nesta rodada!",
+                                 titulo="🧪 POÇÕES", largura=70)
+                return False
+            cura = min(pocao.potencia, max(0, self.hp_inicial - self.hp))
+            if not cura:
+                mostrar_mensagem("Seu HP já está no máximo inicial!", titulo="🧪 POÇÕES",
+                                 largura=70)
+                return False
+            self.hp += cura
+            self.cura_usada_na_rodada = True
+            self.inventario.remove(pocao)
+            mostrar_mensagem(f"🧪 {self.nome} recuperou {cura} HP!\nHP: {self.hp}",
+                             titulo="CURA", estilo="green", largura=70)
+            return True
+        if pocao.efeito in self.efeitos_pocoes:
+            mostrar_mensagem("Já existe uma poção desse tipo ativa. Aguarde o efeito acabar.",
+                             titulo="🧪 POÇÕES", largura=70)
+            return False
+        if pocao.efeito == "sorte" and self.sorte_total >= 2.0:
+            mostrar_mensagem("Sua sorte já está no limite de 2.0x!", titulo="🧪 POÇÕES",
+                             largura=70)
+            return False
+        self.inventario.remove(pocao)
+        self.efeitos_pocoes[pocao.efeito] = {"pocao": pocao, "rodadas": pocao.duracao}
+        mostrar_mensagem(f"{self.nome} usou {pocao}!\n{pocao.descricao_efeito}"
+                         f"\nDuração: {pocao.duracao} rodada(s).", titulo="🧪 POÇÕES",
+                         estilo="green", largura=70)
+        return True
+
+    def avancar_rodada_pocoes(self):
+        self.cura_usada_na_rodada = False
+        if self.hp <= 0:
+            self.efeitos_pocoes.clear()
+            return
+        for tipo, efeito in list(self.efeitos_pocoes.items()):
+            efeito["rodadas"] -= 1
+            if efeito["rodadas"] == 0:
+                del self.efeitos_pocoes[tipo]
+                mostrar_mensagem(f"🧪 A poção de {Pocao.nomes[tipo]} de {self.nome} acabou.",
+                                 titulo="FIM DO EFEITO", largura=70)
 
     @staticmethod
     def preco_venda(item):

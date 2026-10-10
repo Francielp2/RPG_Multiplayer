@@ -2,6 +2,7 @@ from rich.columns import Columns
 from interface.componentes import Panel
 
 from equipamento.armadura import Armadura
+from equipamento.pocao import Pocao
 from equipamento import Equipamento
 from interface.funcoes import mostrar_mensagem, limpar_tela
 from jogador import Jogador
@@ -36,12 +37,14 @@ class Loja:
 
     def novo_equip(self):
         chance = random()
-        if chance < 0.60 :
+        if chance < 0.51 :
             equip = Equipamento.gerarArma(self.turno)
-        elif chance < 0.90 :
+        elif chance < 0.765 :
             equip = Equipamento.gerarAnel(self.turno)
-        else :
+        elif chance < 0.85:
             equip = Armadura.gerarArmadura(self.turno)
+        else:
+            equip = Pocao.gerarPocao()
         self.estoque.append(equip)
 
     def att_loja(self):
@@ -80,6 +83,13 @@ class Loja:
         tabelaarmadura.add_column("Defesa",style="steel_blue")
         tabelaarmadura.add_column("Preço", style="#FFF300")
 
+        tabelapocao = Table(title="[green]🧪 POÇÕES[/]", width=76, padding=(0, 1))
+        tabelapocao.add_column("#")
+        tabelapocao.add_column("Nome", ratio=2, overflow="fold")
+        tabelapocao.add_column("Efeito", overflow="fold")
+        tabelapocao.add_column("Duração", overflow="fold")
+        tabelapocao.add_column("Preço", style="#FFF300")
+
         if self.estoque :
             for i, e in enumerate (self.estoque) : # e-> equipamento
                 if e.tipo =="arma" :
@@ -99,7 +109,10 @@ class Loja:
                                            str(e),
                                            str(e.defesa),
                                            str(e.valor))
-            print(Columns([tabelaarma,tabelaanel,tabelaarmadura], padding=(0, 2)))
+                elif isinstance(e, Pocao):
+                    tabelapocao.add_row(str(i), str(e), e.descricao_efeito,
+                                       e.descricao_duracao, str(e.valor))
+            print(Columns([tabelaarma,tabelaanel,tabelaarmadura,tabelapocao], padding=(0, 2)))
 
         else :
             mostrar_mensagem(mensagem="[red]Nenhum equipamento disponível na loja![/]",

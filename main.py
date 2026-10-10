@@ -56,6 +56,7 @@ while True :
             jogatual = jogadores.index(proximo)
 
             if fim_rodada:
+                partida.encerrar_rodada()
                 loja.chance_att_loja()
                 rodada +=1
             turno += 1

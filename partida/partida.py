@@ -42,6 +42,10 @@ class Partida :
             if candidato in self.jogadores:
                 return candidato, posicao >= len(ordem_turno)
 
+    def encerrar_rodada(self):
+        for jogador in self.jogadores:
+            jogador.avancar_rodada_pocoes()
+
     def lista_mortos(self): #testando
         if self.mortos :
             print("Lista de mortos :")

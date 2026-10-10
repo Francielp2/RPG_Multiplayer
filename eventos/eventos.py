@@ -95,7 +95,7 @@ class EventoAleatorio :
         for jogador in self.alvo :
             texto =f"{jogador.nome} foi escolhido!"
             multi = round(uniform(1.0,2.0),1)
-            chance = int(35 * jogador.sorte)
+            chance = int(35 * jogador.sorte_total)
             texto += f"\n[#FFF300]Multiplicador de moedas : [bold #0EEE7E]{multi}[/][/]"
             texto+=f"\n[#0EEE7E]chance de [bold]ganhar {chance}%[/][/]"
             texto+= f"\n[#FFF300]suas moedas : [bold]{jogador.moedas}[/][/]"

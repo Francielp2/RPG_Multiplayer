@@ -153,6 +153,40 @@ O inventário mostra todos os itens do jogador e permite equipá-los ou desequip
 Você pode baixar todos os arquivos clicando em Code e baixando o zip, depois é só extrair. você precisa ter o Python instalado na sua máquina. pra rodar o jogo é só abrir o main.py em alguma IDE (visual studio code, Pycharm e etc) em breve eu vou fazer um .exe do jogo :)
 
 
+## 🧪 Poções
+
+A loja tem uma tabela de poções de cura, agilidade, força e sorte. Cada novo
+item tem 15% de chance de ser uma poção. Compre e selecione a poção no
+inventário para usar ou vender; ela não ocupa um slot de equipamento.
+
+| Raridade | Rodadas dos bônus | Preço | Cura imediata | Agilidade | Força | Sorte |
+|---|---:|---:|---:|---:|---:|---:|
+| Comum | 1 | 4 | 5 HP | +1 | +1 | +0,1 |
+| Raro | 1 | 6 | 8 HP | +2 | +2 | +0,1 |
+| Épico | 2 | 9 | 12 HP | +2 | +2 | +0,2 |
+| Lendário | 2 | 12 | 16 HP | +3 | +3 | +0,2 |
+| Mítico | 3 | 18 | 20 HP | +3 | +3 | +0,3 |
+
+Cada poção fornece apenas o efeito de seu tipo. Os valores não crescem com
+o turno. Força soma dano antes do crítico; agilidade melhora o acerto; sorte
+melhora eventos e cassino, respeitando o limite total de 2,0. Esses bônus
+desaparecem ao expirar, sem alterar os atributos permanentes.
+
+A cura é imediata, acontece uma única vez e não ultrapassa o HP inicial.
+É possível usar no máximo uma poção de cura por rodada; tentativas sem
+HP a recuperar não consomem a poção.
+No fim de cada rodada, todas as poções de bônus perdem uma rodada de duração,
+incluindo a rodada em que foram usadas. Abrir menus e cancelar um ataque
+não reduz a duração. Não é possível acumular poções do mesmo tipo. A
+tabela de jogadores mostra os efeitos e as rodadas restantes. A venda
+mantém a regra de 25% do preço, com mínimo de uma moeda.
+
+Testes de poções, inventário e duração (sem dispositivo de áudio):
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 # 🤝 ajude na programação
 
 Contribuições são bem-vindas!
