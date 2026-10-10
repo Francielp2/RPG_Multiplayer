@@ -123,56 +123,141 @@ Cadastro de jogadores e apostas continuam usando entrada tradicional. Em entrada
 
 Use a mesma versão do projeto nos dois computadores e mantenha-os na mesma rede Wi-Fi, hotspot ou Ethernet. Internet só é necessária para instalar dependências; a partida usa TCP direto na LAN.
 
-### Testar em dois Linux: servidor + cliente local + cliente remoto
+### Passo a passo: dois computadores Linux
 
-**1. Em cada computador**, na pasta do projeto:
+Neste cenário, seu computador executa **servidor + seu cliente**, em terminais separados. O outro computador executa **um cliente**. O servidor não conta como jogador: são necessários dois clientes conectados.
+
+#### 1. Obter o projeto no outro computador
+
+Se ainda não tem o projeto, execute:
+
+```bash
+git clone https://github.com/Francielp2/RPG_Multiplayer.git
+cd RPG_Multiplayer
+```
+
+Se já clonou, entre na pasta existente. No computador que hospeda, abra o terminal na pasta do projeto que já utiliza. Todos os comandos seguintes devem ser executados na pasta que contém `servidor.py` e `cliente.py`.
+
+#### 2. Preparar o Python nos dois computadores
+
+Execute uma vez em **cada computador**:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-rede.txt
+source .venv/bin/activate
+python -m pip install -r requirements-rede.txt -r requirements-audio.txt
 ```
 
-Para ouvir os efeitos, instale também em **cada computador cliente**:
+Se `.venv` já existe, pule o primeiro comando. A ativação mostra `(.venv)` no início da linha do terminal. **Cada terminal novo precisa ativar sua própria venv**, mesmo no mesmo computador. Não copie `.venv` entre computadores.
+
+Se `venv` não estiver disponível, instale o pacote de ambiente virtual da sua distribuição e repita a criação. Para sair do ambiente quando terminar, execute `deactivate`.
+
+O áudio vem habilitado por padrão. Mantenha a pasta `sound` junto ao projeto nos dois computadores. Se Pygame, os arquivos ou o dispositivo de áudio estiverem indisponíveis, o cliente avisa e continua a partida. O servidor só precisa de `requirements-rede.txt`, mas seu computador também será cliente neste exemplo.
+
+#### 3. Seu computador, terminal 1: iniciar o servidor
+
+Na pasta do projeto:
 
 ```bash
-.venv/bin/python -m pip install -r requirements-audio.txt
+source .venv/bin/activate
+python servidor.py --host 0.0.0.0 --port 5000 --timeout 600 --jogadores 2
 ```
 
-O áudio vem habilitado por padrão. Para jogar sem ele, acrescente `--sem-som` ao comando do cliente. Se Pygame, os arquivos ou o dispositivo de áudio estiverem indisponíveis, o cliente avisa e continua a partida. Mantenha a pasta `sound` junto ao projeto nos dois computadores.
+Aguarde a mensagem **“aguardando 2 jogadores”** e deixe esse terminal aberto. `0.0.0.0` faz o servidor aceitar conexões pelas interfaces de rede. O timeout de 600 segundos vale para a espera no lobby e para cada resposta durante a partida.
 
-Se já tem `.venv`, use-a. Se `venv` não estiver disponível, instale o pacote de ambiente virtual da sua distribuição. Transfira o projeto para o outro computador sem copiar `.venv`.
+#### 4. Seu computador, terminal 2: entrar como jogador
 
-**2. No seu computador, terminal 1 — servidor:**
+Abra **outro terminal**, entre na mesma pasta do projeto e execute:
 
 ```bash
-.venv/bin/python servidor.py --host 0.0.0.0 --port 5000 --timeout 300
+source .venv/bin/activate
+python cliente.py --host 127.0.0.1 --port 5000 --nome Franciel
 ```
 
-O servidor aguarda **dois jogadores**; ele não conta como jogador automaticamente. O timeout de 300 segundos vale para espera no lobby e para cada resposta.
+A mensagem **“Aguardando a sala”** indica que seu cliente entrou. O endereço `127.0.0.1` conecta ao servidor no próprio computador. Mantenha os dois terminais abertos.
 
-**3. No seu computador, terminal 2 — seu cliente:**
+#### 5. Descobrir o IP do computador servidor
 
-```bash
-.venv/bin/python cliente.py --host 127.0.0.1 --port 5000 --nome Franciel
-```
-
-**4. Ainda no seu computador, descubra o IP da conexão com a rede:**
+Em outro terminal no computador servidor:
 
 ```bash
 hostname -I
 ```
 
-Se aparecerem vários IPs, escolha o da sua conexão Wi-Fi/Ethernet que alcança o outro computador, evitando interfaces de VPN ou contêineres. Pode confirmar a interface com `ip addr`.
+Use o IP da conexão Wi-Fi/Ethernet compartilhada com o outro computador. Se houver vários, confirme a interface com `ip addr`; evite endereços de VPN ou contêineres. O IP pode mudar quando você troca de rede ou reinicia a conexão.
 
-**5. No outro Linux — segundo cliente:**
+#### 6. Outro computador: conectar o segundo jogador
+
+Abra o terminal na pasta do projeto, ative a venv e conecte ao **IP encontrado no passo anterior**:
 
 ```bash
-.venv/bin/python cliente.py --host IP_DO_SEU_COMPUTADOR --port 5000 --nome Convidado
+source .venv/bin/activate
+python cliente.py --host 10.0.107.109 --port 5000 --nome Convidado
 ```
 
-Substitua `IP_DO_SEU_COMPUTADOR` pelo IP encontrado, por exemplo `192.168.1.100`. Não use `0.0.0.0` nem `127.0.0.1` no computador remoto. Quando os dois entrarem, a partida começa automaticamente.
+**`10.0.107.109` é um exemplo usado no teste deste projeto**: substitua se o IP atual do servidor for diferente. No computador remoto, não use `127.0.0.1` nem `0.0.0.0`. A porta deve ser a mesma do servidor.
 
-Para um primeiro ensaio rápido, inicie o servidor com `--hp 20 --sem-pausas`. Para testar tudo no mesmo computador primeiro, abra um terceiro terminal e execute o segundo cliente também com `--host 127.0.0.1`, usando outro nome. Para mais participantes, ajuste `--jogadores 3` (até 16).
+Quando ambos os clientes entrarem, a partida começa automaticamente. Cada jogador digita no próprio cliente quando recebe uma pergunta; os demais acompanham as telas públicas e os efeitos sonoros.
+
+### Partidas com três ou mais jogadores
+
+O servidor aceita de **2 a 16 jogadores**. Antes de iniciar, defina quantos clientes participarão. Para três jogadores, no terminal do servidor:
+
+```bash
+source .venv/bin/activate
+python servidor.py --host 0.0.0.0 --port 5000 --timeout 600 --jogadores 3
+```
+
+Seu cliente local, em outro terminal:
+
+```bash
+source .venv/bin/activate
+python cliente.py --host 127.0.0.1 --port 5000 --nome Franciel
+```
+
+Segundo jogador, no computador dele, usando o IP atual do servidor:
+
+```bash
+source .venv/bin/activate
+python cliente.py --host 10.0.107.109 --port 5000 --nome Convidado1
+```
+
+Terceiro jogador, em outro computador ou outro terminal do segundo computador:
+
+```bash
+source .venv/bin/activate
+python cliente.py --host 10.0.107.109 --port 5000 --nome Convidado2
+```
+
+A partida só começa quando **todos os três clientes** entrarem. Use nomes diferentes. É possível abrir vários clientes no mesmo computador; os que rodam no computador servidor usam `127.0.0.1`. Para quatro ou mais jogadores, altere `--jogadores` e abra a quantidade correspondente de clientes.
+
+Não é possível adicionar jogadores depois que a partida começou. Para mudar a quantidade, encerre a sessão, reinicie o servidor com o novo valor e reconecte todos os clientes.
+
+### Reiniciar após timeout, desconexão ou fim da partida
+
+Se o tempo esgotar, um cliente desconectar ou a partida terminar, inicie uma nova sessão:
+
+1. Encerre os processos restantes com **Ctrl+C**, se ainda estiverem abertos.
+2. No terminal do servidor, execute novamente o comando de `servidor.py` com a quantidade desejada.
+3. Reconecte seu cliente local e todos os clientes remotos usando os comandos anteriores.
+
+Nenhum cliente é reconectado automaticamente; a nova partida começa do zero.
+
+### Comandos opcionais para testes
+
+Para um ensaio rápido, com 20 HP e sem as pausas das animações:
+
+```bash
+python servidor.py --host 0.0.0.0 --port 5000 --timeout 600 --jogadores 2 --hp 20 --sem-pausas
+```
+
+Para jogar sem áudio no seu cliente:
+
+```bash
+python cliente.py --host 127.0.0.1 --port 5000 --nome Franciel --sem-som
+```
+
+Esses exemplos pressupõem a venv ativada. Você também pode executar `.venv/bin/python` no lugar de `python`, sem ativar o ambiente. Para testar tudo no mesmo computador, abra dois clientes em terminais separados, com nomes diferentes e `--host 127.0.0.1`.
 
 ### O que verificar na partida
 
@@ -249,6 +334,52 @@ Pendências conhecidas:
 - Execução completa e teclado precisam ser confirmados em uma máquina Windows.
 - Balanceamento das poções e economia precisa de acompanhamento em partidas reais.
 - `requirements-rede.txt` registra Rich e `requirements-audio.txt` registra Pygame opcional nos clientes.
+
+## 📤 Enviar alterações para seu repositório
+
+Na cópia original deste projeto, a branch local é `feat/multiplayer-tcp`. O remoto `origin` aponta para o projeto do autor original e o remoto `meu` aponta para `https://github.com/Francielp2/RPG_Multiplayer.git`. O comando abaixo envia a branch multiplayer para a **`main` do repositório pessoal**.
+
+Primeiro confira, na pasta do projeto:
+
+```bash
+git branch --show-current
+git remote -v
+git status
+```
+
+Confirme que a branch é `feat/multiplayer-tcp` e que `meu` aponta para seu repositório. Se ainda não existe esse remoto, adicione-o uma única vez:
+
+```bash
+git remote add meu https://github.com/Francielp2/RPG_Multiplayer.git
+```
+
+Para enviar somente a atualização deste README:
+
+```bash
+git add README.md
+git commit -m "Documenta execução do multiplayer e envio ao repositório pessoal"
+git push -u meu feat/multiplayer-tcp:main
+```
+
+Para alterações futuras em código, revise `git diff` e inclua os arquivos desejados no `git add` antes de criar o commit. Não é necessário renomear a branch local. Adicionar arquivos e criar o commit são passos locais; o envio ao GitHub acontece no `git push`.
+
+Se o push for recusado porque há commits novos no repositório remoto, consulte a mensagem antes de continuar; não use `--force` para contornar o problema.
+
+### Atualizar o projeto no outro computador
+
+Na cópia clonada de `Francielp2/RPG_Multiplayer`, a branch é `main` e `origin` já aponta para seu repositório. Sem uma partida em execução, entre na pasta e execute:
+
+```bash
+git pull --ff-only origin main
+```
+
+Se os arquivos de dependências também mudaram, com a venv ativada:
+
+```bash
+python -m pip install -r requirements-rede.txt -r requirements-audio.txt
+```
+
+Depois inicie uma nova sessão com servidor e clientes atualizados. Se há alterações locais no outro computador, revise-as antes de atualizar; não descarte arquivos para forçar o pull.
 
 ## 📸 Referências visuais e projeto original
 
