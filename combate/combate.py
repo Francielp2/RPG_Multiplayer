@@ -1,4 +1,3 @@
-from time import sleep
 from interface.componentes import Table
 from rich import print
 
@@ -14,7 +13,6 @@ class Combate :
         self.alvo:Jogador = None  #-> jogador que será atacado
 
     def escolher_alvo(self):
-        from partida import Partida
         if self.qj > 2 :
 
             while  True :
@@ -51,7 +49,6 @@ class Combate :
         return True
 
     def atacar (self) :
-        texto = ""
         if not self.escolher_alvo() :
             return
         d20 = self.jog.d20()

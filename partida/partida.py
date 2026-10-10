@@ -6,7 +6,7 @@ import som
 from interface.funcoes import mostrar_mensagem
 from jogador import Jogador
 class Partida :
-    def __init__(self,jogadores:Jogador):
+    def __init__(self,jogadores:list[Jogador]):
         self.jogadores = jogadores
         self.mortos:list[Jogador] = []
 
@@ -15,7 +15,6 @@ class Partida :
         jogadores = []
         for i in range(qj):
             nome = str (input (f"Nome do jogador {i+1}: ")).strip().title()
-            #nome = f"Jogador {i + 1}"
             jogadores.append(Jogador(nome, hp))
         return jogadores
 
@@ -27,6 +26,21 @@ class Partida :
                                  pausa=2)
                 self.mortos.append(jogador)
                 self.jogadores.remove(jogador)
+
+    def proximo_jogador(self, jogador_atual, ordem_turno):
+        """Escolhe o próximo sobrevivente pela ordem anterior às eliminações.
+
+        Também informa se cruzou o fim da rodada, mesmo que o primeiro
+        participante ou o jogador atual tenha morrido.
+        """
+        if not self.jogadores:
+            return None, False
+        indice = ordem_turno.index(jogador_atual)
+        for passo in range(1, len(ordem_turno) + 1):
+            posicao = indice + passo
+            candidato = ordem_turno[posicao % len(ordem_turno)]
+            if candidato in self.jogadores:
+                return candidato, posicao >= len(ordem_turno)
 
     def lista_mortos(self): #testando
         if self.mortos :
