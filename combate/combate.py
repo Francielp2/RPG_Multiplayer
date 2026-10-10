@@ -1,5 +1,5 @@
 from interface.componentes import Table
-from rich import print
+from interface.io import print
 
 import som
 from interface.funcoes import mostrar_mensagem

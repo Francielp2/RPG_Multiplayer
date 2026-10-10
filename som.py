@@ -1,53 +1,72 @@
-from time import sleep
 from pathlib import Path
 
-import pygame
+import os
 from random import random,randint
 
 PASTA_SONS = Path(__file__).resolve().parent / "sound"
 
-pygame.mixer.init()
+class SomSilencioso:
+    def play(self):
+        pass
 
-bonk = pygame.mixer.Sound(str(PASTA_SONS / "Bonk.wav"))
-dano_soco =pygame.mixer.Sound(str(PASTA_SONS / "soco.wav"))
+    def stop(self):
+        pass
+
+    def set_volume(self, volume):
+        pass
+
+
+SEM_SOM = os.environ.get("RPG_SEM_SOM") == "1"
+if not SEM_SOM:
+    import pygame
+    pygame.mixer.init()
+
+
+def carregar_som(caminho):
+    if SEM_SOM:
+        return SomSilencioso()
+    return pygame.mixer.Sound(caminho)
+
+bonk = carregar_som(str(PASTA_SONS / "Bonk.wav"))
+dano_soco =carregar_som(str(PASTA_SONS / "soco.wav"))
 dano_soco.set_volume(0.8)
-dano_soco2=pygame.mixer.Sound(str(PASTA_SONS / "soco2.wav"))
-dano_espada=pygame.mixer.Sound(str(PASTA_SONS / "golpeespada1.ogg"))
-moedas =pygame.mixer.Sound(str(PASTA_SONS / "moedas.mp3"))
-dano_espada_forte =pygame.mixer.Sound(str(PASTA_SONS / "golpeespada2.mp3"))
-novo_slot = pygame.mixer.Sound(str(PASTA_SONS / "novo slot.MP3"))
-quebra_armadura =pygame.mixer.Sound(str(PASTA_SONS / "quebrar_armadura.mp3"))
-evento =pygame.mixer.Sound(str(PASTA_SONS / "evento_aleatorio.wav"))
-raio =pygame.mixer.Sound(str(PASTA_SONS / "raio.wav"))
+dano_soco2=carregar_som(str(PASTA_SONS / "soco2.wav"))
+dano_espada=carregar_som(str(PASTA_SONS / "golpeespada1.ogg"))
+moedas =carregar_som(str(PASTA_SONS / "moedas.mp3"))
+dano_espada_forte =carregar_som(str(PASTA_SONS / "golpeespada2.mp3"))
+novo_slot = carregar_som(str(PASTA_SONS / "novo slot.MP3"))
+quebra_armadura =carregar_som(str(PASTA_SONS / "quebrar_armadura.mp3"))
+evento =carregar_som(str(PASTA_SONS / "evento_aleatorio.wav"))
+raio =carregar_som(str(PASTA_SONS / "raio.wav"))
 raio.set_volume(0.7)
-roubado =pygame.mixer.Sound(str(PASTA_SONS / "roubado.wav"))
-esquiva =pygame.mixer.Sound(str(PASTA_SONS / "esquiva.wav"))
-attloja =pygame.mixer.Sound(str(PASTA_SONS / "att_loja.mp3"))
-compra = pygame.mixer.Sound(str(PASTA_SONS / "compra.MP3"))
-equipar = pygame.mixer.Sound(str(PASTA_SONS / "equipar.mp3"))
-inventario =pygame.mixer.Sound(str(PASTA_SONS / "inventario.MP3"))
-fail = pygame.mixer.Sound(str(PASTA_SONS / "fail.mp3"))
-fail2 =pygame.mixer.Sound(str(PASTA_SONS / "bobsad.wav"))
-mine_dano =pygame.mixer.Sound(str(PASTA_SONS / "minecraft damage.wav"))
-atacar =pygame.mixer.Sound(str(PASTA_SONS / "atacar.MP3"))
-grave2=pygame.mixer.Sound(str(PASTA_SONS / "grave2.MP3"))
-golpe_armadura=pygame.mixer.Sound(str(PASTA_SONS / "armadura ataque1.MP3"))
-golpe_armadura2 =pygame.mixer.Sound(str(PASTA_SONS / "armadura ataque2.MP3"))
-dado=pygame.mixer.Sound(str(PASTA_SONS / "dado.mp3"))
-comer =pygame.mixer.Sound(str(PASTA_SONS / "mine comendo.mp3"))
-pocaomine=pygame.mixer.Sound(str(PASTA_SONS / "pocaomine.MP3"))
-xpmine=pygame.mixer.Sound(str(PASTA_SONS / "xpmine.wav"))
-cassino=pygame.mixer.Sound(str(PASTA_SONS / "cassino.MP3"))
+roubado =carregar_som(str(PASTA_SONS / "roubado.wav"))
+esquiva =carregar_som(str(PASTA_SONS / "esquiva.wav"))
+attloja =carregar_som(str(PASTA_SONS / "att_loja.mp3"))
+compra = carregar_som(str(PASTA_SONS / "compra.MP3"))
+equipar = carregar_som(str(PASTA_SONS / "equipar.mp3"))
+inventario =carregar_som(str(PASTA_SONS / "inventario.MP3"))
+fail = carregar_som(str(PASTA_SONS / "fail.mp3"))
+fail2 =carregar_som(str(PASTA_SONS / "bobsad.wav"))
+mine_dano =carregar_som(str(PASTA_SONS / "minecraft damage.wav"))
+atacar =carregar_som(str(PASTA_SONS / "atacar.MP3"))
+grave2=carregar_som(str(PASTA_SONS / "grave2.MP3"))
+golpe_armadura=carregar_som(str(PASTA_SONS / "armadura ataque1.MP3"))
+golpe_armadura2 =carregar_som(str(PASTA_SONS / "armadura ataque2.MP3"))
+dado=carregar_som(str(PASTA_SONS / "dado.mp3"))
+comer =carregar_som(str(PASTA_SONS / "mine comendo.mp3"))
+pocaomine=carregar_som(str(PASTA_SONS / "pocaomine.MP3"))
+xpmine=carregar_som(str(PASTA_SONS / "xpmine.wav"))
+cassino=carregar_som(str(PASTA_SONS / "cassino.MP3"))
 cassino.set_volume(0.7)
-roletando=pygame.mixer.Sound(str(PASTA_SONS / "roletando.wav"))
-morte1=pygame.mixer.Sound(str(PASTA_SONS / "morte1.MP3"))
-morte2=pygame.mixer.Sound(str(PASTA_SONS / "morte2.MP3"))
-morte3 = pygame.mixer.Sound(str(PASTA_SONS / "morte3.mp3"))
-morte4 = pygame.mixer.Sound(str(PASTA_SONS / "morte4.mp3"))
-todos_morte=pygame.mixer.Sound(str(PASTA_SONS / "todo mundo morreu.mp3"))
-especial=pygame.mixer.Sound(str(PASTA_SONS / "especial.mp3"))
-fogocj=pygame.mixer.Sound(str(PASTA_SONS / "cj pegando fogo.mp3"))
-vitoria =pygame.mixer.Sound(str(PASTA_SONS / "vitoria.ogg"))
+roletando=carregar_som(str(PASTA_SONS / "roletando.wav"))
+morte1=carregar_som(str(PASTA_SONS / "morte1.MP3"))
+morte2=carregar_som(str(PASTA_SONS / "morte2.MP3"))
+morte3 = carregar_som(str(PASTA_SONS / "morte3.mp3"))
+morte4 = carregar_som(str(PASTA_SONS / "morte4.mp3"))
+todos_morte=carregar_som(str(PASTA_SONS / "todo mundo morreu.mp3"))
+especial=carregar_som(str(PASTA_SONS / "especial.mp3"))
+fogocj=carregar_som(str(PASTA_SONS / "cj pegando fogo.mp3"))
+vitoria =carregar_som(str(PASTA_SONS / "vitoria.ogg"))
 def mortesom() :
     variacao = randint(1,4)
     if variacao == 1 :

@@ -2,11 +2,12 @@
 
 RPG de texto PvP por turnos, feito em Python para aprender lógica de programação e orientação a objetos. A interface usa tabelas, cores e emojis no terminal, com efeitos sonoros.
 
-**Estado atual:** vários jogadores compartilham um único terminal. O multiplayer entre computadores pela rede local ainda está planejado; `servidor.py`, `cliente.py` e os módulos de rede ainda não existem.
+**Estado atual:** modo local no mesmo terminal e multiplayer TCP na rede local, com um servidor e um cliente por jogador. O servidor também pode jogar abrindo seu próprio cliente em outro terminal.
 
 ## 🧩 Funcionalidades disponíveis
 
-- Partidas locais com dois ou mais jogadores, iniciando com 100 HP.
+- Partidas locais e em LAN com dois ou mais jogadores, iniciando com 100 HP.
+- Telas públicas e ações transmitidas aos demais jogadores durante cada turno.
 - Combate com dados, agilidade, críticos e seleção de alvo.
 - Armas, anéis e armaduras com raridades e atributos sorteados.
 - Loja compartilhada, compra de slots e renovação de estoque.
@@ -18,7 +19,7 @@ RPG de texto PvP por turnos, feito em Python para aprender lógica de programaç
 
 ## 🕹️ Instalação e execução do modo local
 
-Requisitos: **Python 3.10 ou superior**, bibliotecas **Rich** e **Pygame** e dispositivo de áudio disponível. Não há versões fixadas nem arquivo de dependências neste momento.
+Requisitos: **Python 3.10 ou superior**, bibliotecas **Rich** e **Pygame** e dispositivo de áudio disponível. Para servidor e clientes de rede, basta instalar Rich pelo arquivo `requirements-rede.txt`; Pygame é usado somente pelo modo local com áudio.
 
 Baixe ou clone o repositório e execute os comandos na pasta do projeto.
 
@@ -40,7 +41,7 @@ py -m venv .venv
 
 A instalação das bibliotecas normalmente requer internet; depois de instaladas, a partida local funciona sem conexão externa. Mantenha a pasta `sound` junto aos arquivos do projeto. Os sons são localizados a partir de `som.py`, independentemente da pasta em que o terminal foi aberto.
 
-A limpeza de tela utiliza o comando adequado ao sistema. O alinhamento de alguns emojis ainda depende do terminal e da fonte. A navegação por Esc foi testada em pseudo-terminal Linux; a leitura no Windows possui teste simulado, mas ainda precisa de confirmação em uma máquina Windows. A inicialização do áudio é obrigatória e pode falhar em ambientes sem dispositivo de som.
+A limpeza de tela utiliza o comando adequado ao sistema. O alinhamento de alguns emojis ainda depende do terminal e da fonte. A navegação por Esc foi testada em pseudo-terminal Linux; a leitura no Windows possui teste simulado, mas ainda precisa de confirmação em uma máquina Windows. O modo local com áudio pode falhar em ambientes sem dispositivo de som. Para executar sem áudio no Linux, use `RPG_SEM_SOM=1 .venv/bin/python main.py`. Servidor e clientes de rede não abrem áudio.
 
 ## 🎮 Regras do jogo atual
 
@@ -118,49 +119,103 @@ Digite o número da opção e confirme com **Enter**. **Esc** volta na loja, no 
 
 Cadastro de jogadores e apostas continuam usando entrada tradicional. Em entrada redirecionada ou consoles sem TTY, os menus também usam entrada tradicional. Não há navegação por mouse ou setas implementada.
 
-## 🌐 Multiplayer por rede local — planejado
+## 🌐 Multiplayer por rede local
 
-O objetivo é permitir uma única partida entre computadores Linux e Windows, cada jogador usando seu próprio terminal na mesma rede Wi-Fi, hotspot ou Ethernet. Não será necessário acesso à internet durante a partida.
+Use a mesma versão do projeto nos dois computadores e mantenha-os na mesma rede Wi-Fi, hotspot ou Ethernet. Internet só é necessária para instalar dependências; a partida usa TCP direto na LAN.
 
-O plano completo está em [CONTEXTO_CODEX_RPG_MULTIPLAYER.md](CONTEXTO_CODEX_RPG_MULTIPLAYER.md). Os comandos e arquivos de servidor/cliente citados nesse documento são propostas para a implementação futura.
+### Testar em dois Linux: servidor + cliente local + cliente remoto
 
-### Arquitetura prevista
+**1. Em cada computador**, na pasta do projeto:
 
-```text
-Cliente Linux ── TCP + JSONL ──┐
-                              ├── Servidor Python ── Uma partida compartilhada
-Cliente Windows ── TCP + JSONL ┘
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-rede.txt
 ```
 
-O servidor será responsável por HP, moedas, inventários, equipamentos, poções e suas durações, loja, eventos, sorteios, turnos, eliminações e vitória. Os clientes enviarão intenções e exibirão respostas; não calcularão resultados ou alterarão atributos por conta própria.
+Se já tem `.venv`, use-a. Se `venv` não estiver disponível, instale o pacote de ambiente virtual da sua distribuição. Transfira o projeto para o outro computador sem copiar `.venv`.
 
-O servidor poderá hospedar e participar usando um cliente em outro terminal do mesmo computador. Host e porta serão configuráveis; a proposta inicial é escutar em `0.0.0.0:5000`, usar `127.0.0.1` para clientes no próprio computador e o IP real do servidor para os demais.
+**2. No seu computador, terminal 1 — servidor:**
 
-### Ordem de implementação
+```bash
+.venv/bin/python servidor.py --host 0.0.0.0 --port 5000 --timeout 300
+```
 
-- [ ] Revisar o estado atual e preservar o modo local e suas regras.
-- [ ] Criar transporte TCP com JSONL, leitura de mensagens fragmentadas e validação de tamanho e conteúdo.
-- [ ] Criar servidor e cliente básicos e testar dois clientes em localhost.
-- [ ] Implementar lobby para dois jogadores, nomes e IDs estáveis, independentes dos índices da lista.
-- [ ] Integrar turnos e combate básico; rejeitar ações fora da vez e sincronizar HP e resultados.
-- [ ] Validar eliminações, vitória, cancelamento, timeout e desconexão sem travamentos.
-- [ ] Integrar loja compartilhada, inventários, equipamentos, venda e poções.
-- [ ] Sincronizar duração das poções, limite de cura por rodada e sorte permanente/temporária no servidor.
-- [ ] Integrar eventos e direcionar perguntas do cassino ao participante escolhido, mesmo fora de sua vez normal.
-- [ ] Preservar Rich, emojis e Esc nos clientes; adaptar sons e pausas para a apresentação local.
-- [ ] Testar a comunicação em LAN entre Linux e Windows e documentar instalação e firewall.
+O servidor aguarda **dois jogadores**; ele não conta como jogador automaticamente. O timeout de 300 segundos vale para espera no lobby e para cada resposta.
 
-O primeiro MVP será uma sessão básica de combate com dois clientes. As outras mecânicas serão integradas depois; qualquer recurso ainda indisponível no modo de rede deverá ser documentado. O jogo local continuará disponível.
+**3. No seu computador, terminal 2 — seu cliente:**
 
-### Cuidados para a integração
+```bash
+.venv/bin/python cliente.py --host 127.0.0.1 --port 5000 --nome Franciel
+```
 
-As regras atuais ainda misturam perguntas, mensagens, sons e pausas. A adaptação precisará incluir `input()` e `ler_opcao()`, não apenas o menu principal. Esc deverá virar uma ação de cancelamento, sem consumir turno ou executar uma compra.
+**4. Ainda no seu computador, descubra o IP da conexão com a rede:**
 
-O processamento das ações será serializado para evitar ataques duplicados e compras do mesmo item. Inventários privados serão enviados somente a quem estiver autorizado; informações públicas, como HP e efeitos ativos, serão sincronizadas entre os jogadores.
+```bash
+hostname -I
+```
 
-O servidor deverá funcionar sem exigir teclado ou dispositivo de áudio. A política inicial prevista para desconexão ou timeout é encerrar a sessão de forma controlada. O transporte TCP será destinado a uma LAN confiável, sem exposição pública da porta.
+Se aparecerem vários IPs, escolha o da sua conexão Wi-Fi/Ethernet que alcança o outro computador, evitando interfaces de VPN ou contêineres. Pode confirmar a interface com `ip addr`.
 
-Contas, banco de dados, múltiplas salas, reconexão automática, internet pública, executáveis e interface web ficam fora do MVP. Não há novos comandos de execução de rede disponíveis ainda.
+**5. No outro Linux — segundo cliente:**
+
+```bash
+.venv/bin/python cliente.py --host IP_DO_SEU_COMPUTADOR --port 5000 --nome Convidado
+```
+
+Substitua `IP_DO_SEU_COMPUTADOR` pelo IP encontrado, por exemplo `192.168.1.100`. Não use `0.0.0.0` nem `127.0.0.1` no computador remoto. Quando os dois entrarem, a partida começa automaticamente.
+
+Para um primeiro ensaio rápido, inicie o servidor com `--hp 20 --sem-pausas`. Para testar tudo no mesmo computador primeiro, abra um terceiro terminal e execute o segundo cliente também com `--host 127.0.0.1`, usando outro nome. Para mais participantes, ajuste `--jogadores 3` (até 16).
+
+### O que verificar na partida
+
+- Somente quem recebeu a pergunta pode digitar uma opção; os demais acompanham as mesmas telas públicas, ataques, loja, eventos e resultados.
+- Abra a loja, cancele com Esc e ataque: cancelar não passa a vez, atacar passa.
+- Compre, equipe, desequipe, venda e use poções. O conteúdo do inventário aparece apenas para seu dono; ações realizadas nele são anunciadas publicamente.
+- No cassino, quem responde é o jogador sorteado pelo evento, que pode ser diferente do participante do turno.
+- Confira efeitos e rodadas restantes nas tabelas, eliminação e mensagem de vitória.
+- Feche um cliente durante uma pergunta: a sessão deve encerrar nos outros terminais. Reinicie servidor e clientes para uma nova partida.
+
+### Se o cliente remoto não conectar
+
+Confirme o IP, a mesma porta nos comandos e que o servidor continua aberto. Redes de convidados podem isolar os computadores. Se o servidor usa UFW ativo, consulte e libere a porta nele:
+
+```bash
+sudo ufw status
+sudo ufw allow 5000/tcp
+```
+
+Essa regra só é necessária quando o firewall bloqueia a conexão. Não configure encaminhamento de porta no roteador: este MVP é para rede local confiável, com TCP sem criptografia.
+
+### Cliente Windows
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-rede.txt
+.\.venv\Scripts\python.exe cliente.py --host IP_DO_SERVIDOR --port 5000 --nome Convidado
+```
+
+O servidor também pode ser iniciado pelo mesmo Python no Windows. A implementação evita dependências Unix no caminho Windows; testes em uma máquina Windows e na sua LAN ainda precisam ser realizados.
+
+### Arquitetura e reaproveitamento
+
+- `partida/motor.py`: sequência única de regras, usada por `main.py` e pelo servidor.
+- `interface/io.py`: entrada, saída, limpeza, pausas e escopo privado, selecionados por contexto. O modo local usa o terminal normalmente.
+- `rede/protocolo.py`: TCP + JSONL UTF-8, buffer persistente para fragmentação e limite de 64 KiB por mensagem.
+- `rede/servidor_tcp.py`: lobby, IDs estáveis, perguntas com ID, timeout e validação da conexão autorizada. Somente o motor modifica a partida; threads de rede recebem respostas.
+- `rede/terminal_remoto.py`: renderiza as tabelas/painéis Rich originais e envia as mesmas telas públicas aos clientes.
+- `rede/cliente_tcp.py`: exibe telas e envia entradas; não importa regras, sorteia dados nem altera atributos.
+
+Para integrar funções novas do projeto original, use `interface.io.print`, `perguntar`, `pausa` e `limpar` em vez de acesso direto ao terminal. Os menus numéricos podem continuar usando `interface.teclado.ler_opcao`. Perguntas de eventos destinadas a outra pessoa devem passar `jogador=...` para `perguntar`. Use `privado(jogador)` para detalhes do inventário e `anunciar(...)` para a ação pública. Não há substituição global de `input` ou `print`.
+
+Loja, inventário, venda, equipamentos, poções e eventos usam as regras existentes no servidor. O documento [CONTEXTO_CODEX_RPG_MULTIPLAYER.md](CONTEXTO_CODEX_RPG_MULTIPLAYER.md) conserva as orientações originais; esta seção descreve o que já foi implementado.
+
+### Limitações do MVP
+
+- Uma sala por processo; participantes entram antes de começar. Sem reconexão ou entrada tardia. Desconexão, timeout ou interrupção do servidor cancela a sessão.
+- Sem efeitos sonoros em rede; áudio permanece no modo local.
+- A largura das telas públicas é a menor largura informada pelos clientes (40–160 colunas). `--largura 120` permite fixá-la; mantenha os terminais com pelo menos essa largura. Caracteres e emojis são preservados, mas sua aparência depende da fonte e do terminal.
+- Detalhes privados e perguntas destinadas a um jogador diferem por permissão; o restante da interface é compartilhado.
+- O cliente usa o mesmo repositório por praticidade. Para distribuir só o cliente, bastam `cliente.py`, `requirements-rede.txt`, `interface/{__init__,teclado,io}.py` e `rede/{__init__,cliente_tcp,protocolo}.py`, preservando as pastas.
 
 ## 🧪 Testes e pendências
 
@@ -176,15 +231,15 @@ Execute os testes na raiz, usando o ambiente virtual:
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Os testes atuais verificam poções, compra e venda, duração por rodada, cancelamento por Esc, entrada numérica e restauração do terminal. O áudio é substituído nos testes; eles não confirmam a reprodução dos sons. O teste de pseudo-terminal Unix é ignorado no Windows. Ainda não há testes de rede.
+Os testes verificam poções, compra e venda, duração por rodada, Esc e restauração do terminal, framing JSONL, envio concorrente, partidas TCP completas com dois e três clientes, turnos após eliminações, igualdade de telas públicas, privacidade, rejeição de entradas fora da vez/antigas, timeout e desconexão. Também executam `servidor.py` e dois processos de `cliente.py`, além de verificar a restauração do teclado de um cliente em pseudo-terminal Linux após desconexão. O áudio é substituído nos testes; eles não confirmam os sons. O teste de pseudo-terminal Unix é ignorado no Windows. Testes TCP precisam de permissão para abrir sockets locais.
 
-Pendências conhecidas antes do multiplayer:
+Pendências conhecidas:
 
 - A validação do menu principal aceita índices pelo tamanho da lista, incluindo a opção zero sem ação.
 - Alinhamento visual de emojis depende do terminal e da fonte.
 - Execução completa e teclado precisam ser confirmados em uma máquina Windows.
 - Balanceamento das poções e economia precisa de acompanhamento em partidas reais.
-- Dependências ainda precisam ser registradas com versões verificadas.
+- `requirements-rede.txt` registra Rich; o modo local ainda instala Pygame separadamente.
 
 ## 📸 Referências visuais e projeto original
 

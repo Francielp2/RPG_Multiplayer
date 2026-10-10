@@ -1,10 +1,10 @@
-from time import sleep
+from interface.io import pausa as sleep
 
 import som
 from interface.funcoes import mostrar_mensagem
 from jogador import Jogador
 from random import randint,choice,choices,random
-from rich import print
+from interface.io import print, perguntar
 from rich.panel import Panel
 from random import uniform
 
@@ -104,7 +104,8 @@ class EventoAleatorio :
 
                 mostrar_mensagem(texto, titulo="[#0EEE7E]$$$[/] [#FFF300 bold]CASSINO [#0EEE7E]$$$[/][/]", largura=60, pausa=0.8)
                 try :
-                    aposta = int (input ("quanto deseja apostar?"))
+                    entrada = perguntar("quanto deseja apostar?", jogador=jogador)
+                    aposta = int("0" if entrada is None else entrada)
                 except ValueError :
                     mostrar_mensagem("Digite um valor válido",titulo=":/",
                                      estilo="red",pausa=1)

@@ -1,5 +1,6 @@
 from random import randint
-from time import sleep
+from uuid import uuid4
+from interface.io import pausa as sleep
 
 from interface.componentes import Panel
 from interface.componentes import Table
@@ -9,9 +10,10 @@ from equipamento import Equipamento
 from equipamento.armadura import Armadura
 from equipamento.pocao import Pocao
 from interface.funcoes import mostrar_mensagem
-from rich import print
+from interface.io import print, anunciar as anunciar_acao
 class Jogador :
-    def __init__(self,nome,hp):
+    def __init__(self,nome,hp,jogador_id=None):
+        self.id = jogador_id or uuid4().hex
         # ========= ATRIBUTOS ========
         self.nome = nome
         self.hp = hp
@@ -279,6 +281,7 @@ class Jogador :
                 texto = f"↓ Desequipando {self.armadura.nome}\n"
             self.armadura = item
         texto += f"[bold]{self.nome}[/]↑ Equipou [bold]{item}[/]"
+        anunciar_acao(f"{self.nome} equipou {item.nome}.")
         som.equipar.play()
         mostrar_mensagem(texto,titulo="▤ Inventário",pausa=1.3,largura=50)
 
@@ -295,6 +298,7 @@ class Jogador :
                 mostrar_mensagem("Seu HP já está no máximo inicial!", titulo="🧪 POÇÕES",
                                  largura=70)
                 return False
+            anunciar_acao(f"{self.nome} usou uma poção e recuperou {cura} HP.")
             self.hp += cura
             self.cura_usada_na_rodada = True
             self.inventario.remove(pocao)
@@ -310,6 +314,7 @@ class Jogador :
                              largura=70)
             return False
         self.inventario.remove(pocao)
+        anunciar_acao(f"{self.nome} usou {pocao.nome} ({pocao.duracao} rodada(s)).")
         self.efeitos_pocoes[pocao.efeito] = {"pocao": pocao, "rodadas": pocao.duracao}
         mostrar_mensagem(f"{self.nome} usou {pocao}!\n{pocao.descricao_efeito}"
                          f"\nDuração: {pocao.duracao} rodada(s).", titulo="🧪 POÇÕES",
@@ -335,6 +340,7 @@ class Jogador :
     def desequipar(self, item, anunciar=True):
         for slot in ("arma", "anel", "armadura"):
             if getattr(self, slot) is item:
+                anunciar_acao(f"{self.nome} desequipou {item.nome}.")
                 setattr(self, slot, None)
                 if anunciar:
                     som.equipar.play()
@@ -355,6 +361,7 @@ class Jogador :
         self.desequipar(item, anunciar=False)
         self.inventario.remove(item)
         self.moedas += valor
+        anunciar_acao(f"{self.nome} vendeu um item por {valor} moeda(s).")
         som.moedas.play()
         mostrar_mensagem(f"{self.nome} vendeu {item} por {valor} moeda(s)!"
                          f"\nMoedas ✪: {self.moedas}", titulo="▤ VENDA",

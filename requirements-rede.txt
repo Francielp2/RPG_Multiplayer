@@ -1,0 +1,2 @@
+# Servidor e clientes não precisam de Pygame no MVP.
+rich>=13,<15

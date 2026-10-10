@@ -1,10 +1,11 @@
 import random
-from time import sleep
-from rich import print
+from interface.io import pausa as sleep
+from interface.io import print
 
 import som
 from interface.funcoes import mostrar_mensagem
 from interface.teclado import ler_opcao
+from interface.io import perguntar
 from jogador import Jogador
 class Partida :
     def __init__(self,jogadores:list[Jogador]):
@@ -15,7 +16,7 @@ class Partida :
     def registrar_jogadores(cls,qj,hp):
         jogadores = []
         for i in range(qj):
-            nome = str (input (f"Nome do jogador {i+1}: ")).strip().title()
+            nome = str (perguntar(f"Nome do jogador {i+1}: ")).strip().title()
             jogadores.append(Jogador(nome, hp))
         return jogadores
 

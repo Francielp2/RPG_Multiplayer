@@ -1,10 +1,10 @@
-from rich import print
+from interface.io import print
 from interface.componentes import Panel
-from time import sleep
-import os
+from interface.io import pausa as sleep
+from interface.io import limpar
 
 def limpar_tela():
-    os.system("cls" if os.name == "nt" else "clear")
+    limpar()
 
 def mostrar_mensagem(mensagem,titulo,pausa=0.8,largura=30,estilo="",som=None,linha_som =1) :
     linhas = mensagem.split("\n")

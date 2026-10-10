@@ -1,7 +1,7 @@
 from jogador import Jogador
 from interface.componentes import Table
 from interface.componentes import Panel
-from rich import print
+from interface.io import print
 from rich.text import Text
 from rich.columns import Columns
 

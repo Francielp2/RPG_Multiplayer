@@ -8,8 +8,8 @@ from interface.funcoes import mostrar_mensagem, limpar_tela
 from interface.teclado import ler_opcao
 from jogador import Jogador
 from random import randint,random
-from time import sleep
-from rich import print
+from interface.io import pausa as sleep
+from interface.io import print
 from interface.componentes import Table
 import som
 class Loja:
