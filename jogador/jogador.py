@@ -158,9 +158,7 @@ class Jogador :
             mostrar_mensagem(mensagem="Inventário vazio",titulo="▤ Inventário",
                              estilo="red",pausa=1.5)
             return
-        opc = 0
-        fim = len(self.inventario)
-        while opc != fim :
+        while self.inventario:
             tabela = Table(title="▤ Inventário ▤ ", width=88)
             tabela.add_column("#")  # index
             tabela.add_column("Nome", ratio=2)
@@ -168,6 +166,7 @@ class Jogador :
             tabela.add_column("Agilidade",style="blue")
             tabela.add_column("defesa",style="steel_blue")
             tabela.add_column("Categoria")
+            tabela.add_column("Venda ✪", style="#FFF300")
             from partida import Partida
             for i, item in  enumerate(self.inventario) :
                 tabela.add_row(
@@ -176,9 +175,10 @@ class Jogador :
                     str(item.dano if item.dano > 0 else " _ "),
                     str(item.agilidade if item.agilidade > 0 else " _ "),
                     str(item.defesa if item.defesa > 0 else " _ "),
-                    str(item.tipo)
+                    str(item.tipo),
+                    str(self.preco_venda(item))
                 )
-            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "", "")
+            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "", "", "")
             print(tabela)
             arma = self.arma if self.arma else "Vazio"
             anel = self.anel if self.anel else "Vazio"
@@ -194,8 +194,21 @@ class Jogador :
             if opc == None :
                 return
 
-            if isinstance(self.inventario[opc], Equipamento):
-                self.equipar(self.inventario[opc])
+            item = self.inventario[opc]
+            if isinstance(item, Equipamento):
+                acoes = (f"{item}\n"
+                         "[green][0] ↑ Equipar[/]\n"
+                         "[blue][1] ↓ Desequipar[/]\n"
+                         f"[#FFF300][2] Vender por {self.preco_venda(item)} moeda(s)[/]\n"
+                         "[red][-1] ↩️ Voltar[/]")
+                print(Panel(acoes, title="▤ AÇÕES DO ITEM", width=76))
+                acao = Partida.validar_opc([0, 1, 2], "Sua opção: ")
+                if acao == 0:
+                    self.equipar(item)
+                elif acao == 1:
+                    self.desequipar(item)
+                elif acao == 2:
+                    self.vender(item)
 
 
     def equipar(self,item):
@@ -221,3 +234,36 @@ class Jogador :
         texto += f"[bold]{self.nome}[/]↑ Equipou [bold]{item}[/]"
         som.equipar.play()
         mostrar_mensagem(texto,titulo="▤ Inventário",pausa=1.3,largura=50)
+
+    @staticmethod
+    def preco_venda(item):
+        return max(1, int(item.valor * 0.25))
+
+    def desequipar(self, item, anunciar=True):
+        for slot in ("arma", "anel", "armadura"):
+            if getattr(self, slot) is item:
+                setattr(self, slot, None)
+                if anunciar:
+                    som.equipar.play()
+                    mostrar_mensagem(f"[bold]{self.nome}[/] ↓ Desequipou {item}",
+                                     titulo="▤ Inventário", pausa=1.3, largura=50)
+                return True
+        if anunciar:
+            mostrar_mensagem(f"{item} não está equipado!", titulo="▤ Inventário",
+                             estilo="red", largura=50)
+        return False
+
+    def vender(self, item):
+        if item not in self.inventario:
+            mostrar_mensagem(f"{item} não está no inventário!", titulo="▤ Inventário",
+                             estilo="red", largura=50)
+            return False
+        valor = self.preco_venda(item)
+        self.desequipar(item, anunciar=False)
+        self.inventario.remove(item)
+        self.moedas += valor
+        som.moedas.play()
+        mostrar_mensagem(f"{self.nome} vendeu {item} por {valor} moeda(s)!"
+                         f"\nMoedas ✪: {self.moedas}", titulo="▤ VENDA",
+                         estilo="#FFF300", pausa=1.3, largura=70)
+        return True
