@@ -1,5 +1,5 @@
 from time import sleep
-from rich.table import Table
+from interface.componentes import Table
 from rich import print
 
 import som
@@ -18,9 +18,9 @@ class Combate :
         if self.qj > 2 :
 
             while  True :
-                jogtabela = Table(title="JOGADORES⚔️")
+                jogtabela = Table(title="JOGADORES⚔️", width=64)
                 jogtabela.add_column("#") #indice
-                jogtabela.add_column("Nome")
+                jogtabela.add_column("Nome", ratio=2)
                 jogtabela.add_column("HP",style= "#0BC900")
                 for i in range(self.qj):
                     if i != self.indice:

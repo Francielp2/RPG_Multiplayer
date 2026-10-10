@@ -1,5 +1,5 @@
 from rich.columns import Columns
-from rich.panel import Panel
+from interface.componentes import Panel
 
 from equipamento.armadura import Armadura
 from equipamento import Equipamento
@@ -8,7 +8,7 @@ from jogador import Jogador
 from random import randint,random
 from time import sleep
 from rich import print
-from rich.table import Table
+from interface.componentes import Table
 import som
 class Loja:
     def __init__(self):
@@ -59,24 +59,24 @@ class Loja:
         return
 
     def mostrar_loja(self,jog:Jogador):
-        tabelaarma = Table(title="[#FFF300] ⚔️ ARMAS⚔️ [/] ")
+        tabelaarma = Table(title="[#FFF300] ⚔️ ARMAS⚔️ [/] ", width=76)
         tabelaarma.add_column("#") #indice
-        tabelaarma.add_column("Nome")
+        tabelaarma.add_column("Nome", ratio=2)
         tabelaarma.add_column("Dano", style="red")
         tabelaarma.add_column("Agilidade", style="blue")
         tabelaarma.add_column("Preço", style="#FFF300")
 
 
-        tabelaanel = Table(title="[blue]ANEIS[/]")
+        tabelaanel = Table(title="[blue]ANEIS[/]", width=76)
         tabelaanel.add_column("#")  # indice
-        tabelaanel.add_column("Nome")
+        tabelaanel.add_column("Nome", ratio=2)
         tabelaanel.add_column("Dano", style="red")
         tabelaanel.add_column("Agilidade", style="blue")
         tabelaanel.add_column("Preço", style="#FFF300")
 
-        tabelaarmadura = Table(title="ARMADURAS")
+        tabelaarmadura = Table(title="ARMADURAS", width=76)
         tabelaarmadura.add_column("#")  # indice
-        tabelaarmadura.add_column("Nome")
+        tabelaarmadura.add_column("Nome", ratio=2)
         tabelaarmadura.add_column("Defesa",style="steel_blue")
         tabelaarmadura.add_column("Preço", style="#FFF300")
 
@@ -99,7 +99,7 @@ class Loja:
                                            str(e),
                                            str(e.defesa),
                                            str(e.valor))
-            print(Columns([tabelaarma,tabelaanel,tabelaarmadura]))
+            print(Columns([tabelaarma,tabelaanel,tabelaarmadura], padding=(0, 2)))
 
         else :
             mostrar_mensagem(mensagem="[red]Nenhum equipamento disponível na loja![/]",
@@ -109,7 +109,7 @@ class Loja:
         texto += f"\n[#3498DB][-2] ✨ Atualizar loja[/] [#FFF300](5 moedas)[/]"
         texto += f"\n[red][-1] ↩️ Voltar[/]"
         texto +=f"\n[#FFF300]Suas [bold]moedas ✪ : {jog.moedas}[/][/]"
-        painel = Panel(texto,title="suas ações :",width=60)
+        painel = Panel(texto,title="suas ações :",width=76)
         print(painel)
 
     def compra(self, jog: Jogador):

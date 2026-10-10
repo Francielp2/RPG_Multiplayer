@@ -2,8 +2,8 @@ from os import remove
 from random import randint
 from time import sleep
 
-from rich.panel import Panel
-from rich.table import Table
+from interface.componentes import Panel
+from interface.componentes import Table
 
 import som
 from equipamento import Equipamento
@@ -161,9 +161,9 @@ class Jogador :
         opc = 0
         fim = len(self.inventario)
         while opc != fim :
-            tabela = Table(title="▤ Inventário ▤ ")
+            tabela = Table(title="▤ Inventário ▤ ", width=88)
             tabela.add_column("#")  # index
-            tabela.add_column("Nome")
+            tabela.add_column("Nome", ratio=2)
             tabela.add_column("Dano",style="red")
             tabela.add_column("Agilidade",style="blue")
             tabela.add_column("defesa",style="steel_blue")
@@ -178,7 +178,7 @@ class Jogador :
                     str(item.defesa if item.defesa > 0 else " _ "),
                     str(item.tipo)
                 )
-            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "")
+            tabela.add_row("[red]-1[/]", "[red]↩️ Voltar[/]", "", "", "", "")
             print(tabela)
             arma = self.arma if self.arma else "Vazio"
             anel = self.anel if self.anel else "Vazio"
@@ -187,7 +187,7 @@ class Jogador :
             texto += f"\nAnel : {anel}"
             texto += f"\nArmadura: {armadura}"
             painel = Panel(title="EQUIPADOS⚔️",
-                           renderable=texto,width=60)
+                           renderable=texto,width=76)
             print(painel)
 
             opc = Partida.validar_opc(lista=self.inventario)

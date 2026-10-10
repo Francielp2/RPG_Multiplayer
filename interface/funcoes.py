@@ -1,5 +1,5 @@
 from rich import print
-from rich.panel import Panel
+from interface.componentes import Panel
 from time import sleep
 import os
 

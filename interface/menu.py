@@ -1,20 +1,19 @@
 from jogador import Jogador
-from rich.table import Table
-from rich.panel import Panel
+from interface.componentes import Table
+from interface.componentes import Panel
 from rich import print
 from rich.text import Text
 from rich.columns import Columns
-from rich.box import HEAVY
 
 
 
 def Tabelajogadores(jogadores:list[Jogador],jogatual:Jogador):
 
-    tabela = Table(title=f"Jogadores ")
+    tabela = Table(title="Jogadores", width=64)
     tabela.add_column("", width=1)
-    tabela.add_column("Nome",justify="left",style="bold")
-    tabela.add_column("[#0BC900]HP ❤️[/]",justify="center")
-    tabela.add_column("[#FFF300]Moedas ✪ [/]",justify="left",width=9,style="#FFF300")
+    tabela.add_column("Nome",justify="left",style="bold",ratio=2)
+    tabela.add_column("[#0BC900]HP ❤️[/]",justify="center",width=10)
+    tabela.add_column("[#FFF300]Moedas ✪ [/]",justify="left",width=12,style="#FFF300")
 
     for jog in jogadores :
         alerta = ""
@@ -40,10 +39,10 @@ def mostrar_acoes(jogatual:Jogador,turno):
     texto.append("[1] ⚔️ Atacar\n",style="bold red")
     texto.append("[2] ▣ Loja\n",style="bold #FFF300")
     texto.append("[3] ▤ Inventário\n",style="bold blue")
-    opcoesPanel = Panel(texto,height=5,width=25,title="⚔ AÇÕES")
+    opcoesPanel = Panel(texto,width=28,title="⚔ AÇÕES")
     status = f"[#0BC900]HP : [bold]{jogatual.hp}[/][/]"
-    status +=f"    [#FFF300]Moedas ✪ : [bold]{jogatual.moedas}[/][/]"
-    status += f"    [#0EEE7E]Sorte: [bold]{jogatual.sorte}[/]x[/]"
+    status +=f"\n[#FFF300]Moedas ✪ : [bold]{jogatual.moedas}[/][/]"
+    status += f"\n[#0EEE7E]Sorte: [bold]{jogatual.sorte}[/]x[/]"
     status += f"\n[red]DANO = (1 - {jogatual.d10max}) + {jogatual.dano}[/]"
     status += f"\n[blue]AGILIDADE = (1 - {jogatual.d20max}) + {jogatual.agilidade}[/]"
     status+= f"\nEspada : {espada}"
@@ -51,8 +50,8 @@ def mostrar_acoes(jogatual:Jogador,turno):
     status += f"\nArmadura : {armadura}"
     statusPainel = Panel(status,
                          title=f"[bold red on black]{jogatual.nome}[/]",
-                         width=50,height=8,box=HEAVY,subtitle=f"⏰ [bold red on black]Turno :{turno}[/]")
-    print(Columns([opcoesPanel,statusPainel]))
+                         width=64,subtitle=f"⏰ [bold red on black]Turno :{turno}[/]")
+    print(Columns([opcoesPanel,statusPainel], padding=(0, 2)))
 
 
 
