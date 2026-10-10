@@ -1,9 +1,9 @@
-from pathlib import Path
+from audio import ARQUIVOS_SOM, PASTA_SONS
+from interface.io import terminal_atual
 
 import os
 from random import random,randint
 
-PASTA_SONS = Path(__file__).resolve().parent / "sound"
 
 class SomSilencioso:
     def play(self):
@@ -22,51 +22,76 @@ if not SEM_SOM:
     pygame.mixer.init()
 
 
-def carregar_som(caminho):
-    if SEM_SOM:
-        return SomSilencioso()
-    return pygame.mixer.Sound(caminho)
+class EfeitoSonoro:
+    """Encaminha o mesmo efeito para áudio local ou clientes autorizados."""
 
-bonk = carregar_som(str(PASTA_SONS / "Bonk.wav"))
-dano_soco =carregar_som(str(PASTA_SONS / "soco.wav"))
+    def __init__(self, nome):
+        self.nome = nome
+        self.volume = 1.0
+        self.local = SomSilencioso() if SEM_SOM else pygame.mixer.Sound(str(PASTA_SONS / ARQUIVOS_SOM[nome]))
+
+    def play(self):
+        terminal = terminal_atual()
+        if terminal is not None:
+            terminal.som(self.nome, "play", self.volume)
+        else:
+            return self.local.play()
+
+    def stop(self):
+        terminal = terminal_atual()
+        if terminal is not None:
+            terminal.som(self.nome, "stop", self.volume)
+        else:
+            self.local.stop()
+
+    def set_volume(self, volume):
+        self.volume = volume
+        self.local.set_volume(volume)
+
+
+def carregar_som(nome):
+    return EfeitoSonoro(nome)
+
+bonk = carregar_som('bonk')
+dano_soco =carregar_som('dano_soco')
 dano_soco.set_volume(0.8)
-dano_soco2=carregar_som(str(PASTA_SONS / "soco2.wav"))
-dano_espada=carregar_som(str(PASTA_SONS / "golpeespada1.ogg"))
-moedas =carregar_som(str(PASTA_SONS / "moedas.mp3"))
-dano_espada_forte =carregar_som(str(PASTA_SONS / "golpeespada2.mp3"))
-novo_slot = carregar_som(str(PASTA_SONS / "novo slot.MP3"))
-quebra_armadura =carregar_som(str(PASTA_SONS / "quebrar_armadura.mp3"))
-evento =carregar_som(str(PASTA_SONS / "evento_aleatorio.wav"))
-raio =carregar_som(str(PASTA_SONS / "raio.wav"))
+dano_soco2=carregar_som('dano_soco2')
+dano_espada=carregar_som('dano_espada')
+moedas =carregar_som('moedas')
+dano_espada_forte =carregar_som('dano_espada_forte')
+novo_slot = carregar_som('novo_slot')
+quebra_armadura =carregar_som('quebra_armadura')
+evento =carregar_som('evento')
+raio =carregar_som('raio')
 raio.set_volume(0.7)
-roubado =carregar_som(str(PASTA_SONS / "roubado.wav"))
-esquiva =carregar_som(str(PASTA_SONS / "esquiva.wav"))
-attloja =carregar_som(str(PASTA_SONS / "att_loja.mp3"))
-compra = carregar_som(str(PASTA_SONS / "compra.MP3"))
-equipar = carregar_som(str(PASTA_SONS / "equipar.mp3"))
-inventario =carregar_som(str(PASTA_SONS / "inventario.MP3"))
-fail = carregar_som(str(PASTA_SONS / "fail.mp3"))
-fail2 =carregar_som(str(PASTA_SONS / "bobsad.wav"))
-mine_dano =carregar_som(str(PASTA_SONS / "minecraft damage.wav"))
-atacar =carregar_som(str(PASTA_SONS / "atacar.MP3"))
-grave2=carregar_som(str(PASTA_SONS / "grave2.MP3"))
-golpe_armadura=carregar_som(str(PASTA_SONS / "armadura ataque1.MP3"))
-golpe_armadura2 =carregar_som(str(PASTA_SONS / "armadura ataque2.MP3"))
-dado=carregar_som(str(PASTA_SONS / "dado.mp3"))
-comer =carregar_som(str(PASTA_SONS / "mine comendo.mp3"))
-pocaomine=carregar_som(str(PASTA_SONS / "pocaomine.MP3"))
-xpmine=carregar_som(str(PASTA_SONS / "xpmine.wav"))
-cassino=carregar_som(str(PASTA_SONS / "cassino.MP3"))
+roubado =carregar_som('roubado')
+esquiva =carregar_som('esquiva')
+attloja =carregar_som('attloja')
+compra = carregar_som('compra')
+equipar = carregar_som('equipar')
+inventario =carregar_som('inventario')
+fail = carregar_som('fail')
+fail2 =carregar_som('fail2')
+mine_dano =carregar_som('mine_dano')
+atacar =carregar_som('atacar')
+grave2=carregar_som('grave2')
+golpe_armadura=carregar_som('golpe_armadura')
+golpe_armadura2 =carregar_som('golpe_armadura2')
+dado=carregar_som('dado')
+comer =carregar_som('comer')
+pocaomine=carregar_som('pocaomine')
+xpmine=carregar_som('xpmine')
+cassino=carregar_som('cassino')
 cassino.set_volume(0.7)
-roletando=carregar_som(str(PASTA_SONS / "roletando.wav"))
-morte1=carregar_som(str(PASTA_SONS / "morte1.MP3"))
-morte2=carregar_som(str(PASTA_SONS / "morte2.MP3"))
-morte3 = carregar_som(str(PASTA_SONS / "morte3.mp3"))
-morte4 = carregar_som(str(PASTA_SONS / "morte4.mp3"))
-todos_morte=carregar_som(str(PASTA_SONS / "todo mundo morreu.mp3"))
-especial=carregar_som(str(PASTA_SONS / "especial.mp3"))
-fogocj=carregar_som(str(PASTA_SONS / "cj pegando fogo.mp3"))
-vitoria =carregar_som(str(PASTA_SONS / "vitoria.ogg"))
+roletando=carregar_som('roletando')
+morte1=carregar_som('morte1')
+morte2=carregar_som('morte2')
+morte3 = carregar_som('morte3')
+morte4 = carregar_som('morte4')
+todos_morte=carregar_som('todos_morte')
+especial=carregar_som('especial')
+fogocj=carregar_som('fogocj')
+vitoria =carregar_som('vitoria')
 def mortesom() :
     variacao = randint(1,4)
     if variacao == 1 :

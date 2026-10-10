@@ -115,8 +115,8 @@ class TestPartidaTCP(unittest.TestCase):
         a, b = self.conectar(porta, "Ana"), self.conectar(porta, "Bruno")
         ma = self.ate(a, "solicitar_entrada")
         mb = self.ate(b, "solicitar_entrada")
-        self.assertEqual([m for m in ma if m["tipo"] in ("tela", "estado")],
-                         [m for m in mb if m["tipo"] in ("tela", "estado")])
+        self.assertEqual([m for m in ma if m["tipo"] in ("tela", "estado", "som")],
+                         [m for m in mb if m["tipo"] in ("tela", "estado", "som")])
         pedido = ma[-1]
         self.assertTrue(pedido["responder"])
         self.assertFalse(mb[-1]["responder"])
@@ -155,8 +155,8 @@ class TestPartidaTCP(unittest.TestCase):
                     mensagens.append(mensagem)
                     if mensagem["tipo"] in ("solicitar_entrada", "fim_partida"):
                         break
-            self.assertEqual([m for m in ma if m["tipo"] in ("tela", "estado")],
-                             [m for m in mb if m["tipo"] in ("tela", "estado")])
+            self.assertEqual([m for m in ma if m["tipo"] in ("tela", "estado", "som")],
+                             [m for m in mb if m["tipo"] in ("tela", "estado", "som")])
             if ma[-1]["tipo"] == "fim_partida":
                 self.assertFalse(ma[-1]["cancelada"])
                 self.assertEqual(ma[-1], mb[-1])
@@ -239,7 +239,7 @@ class TestPartidaTCP(unittest.TestCase):
                     if mensagem["tipo"] in ("solicitar_entrada", "fim_partida"):
                         break
                 mensagens.append(lista)
-            telas = [[m for m in lista if m["tipo"] in ("tela", "estado")] for lista in mensagens]
+            telas = [[m for m in lista if m["tipo"] in ("tela", "estado", "som")] for lista in mensagens]
             self.assertEqual(telas[0], telas[1])
             self.assertEqual(telas[0], telas[2])
         else:

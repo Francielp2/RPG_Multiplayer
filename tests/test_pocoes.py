@@ -10,7 +10,9 @@ from rich.console import Console
 # O som é substituído apenas neste processo de testes, sem abrir dispositivo.
 _audio = patch.dict(sys.modules, {"som": MagicMock()})
 _audio.start()
-unittest.addModuleCleanup(_audio.stop)
+def tearDownModule():
+    # A limpeza pertence a este módulo, mesmo quando outros são descobertos antes.
+    _audio.stop()
 from equipamento import Equipamento
 from equipamento.pocao import Pocao
 from jogador import Jogador

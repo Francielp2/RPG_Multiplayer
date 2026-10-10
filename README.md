@@ -19,7 +19,7 @@ RPG de texto PvP por turnos, feito em Python para aprender lógica de programaç
 
 ## 🕹️ Instalação e execução do modo local
 
-Requisitos: **Python 3.10 ou superior**, bibliotecas **Rich** e **Pygame** e dispositivo de áudio disponível. Para servidor e clientes de rede, basta instalar Rich pelo arquivo `requirements-rede.txt`; Pygame é usado somente pelo modo local com áudio.
+Requisitos: **Python 3.10 ou superior**, bibliotecas **Rich** e **Pygame** e dispositivo de áudio disponível. Para servidor e clientes de rede, basta instalar Rich pelo arquivo `requirements-rede.txt`; Pygame é usado pelo modo local e pelos clientes de rede com áudio; o servidor não precisa dele.
 
 Baixe ou clone o repositório e execute os comandos na pasta do projeto.
 
@@ -39,9 +39,9 @@ py -m venv .venv
 .\.venv\Scripts\python.exe main.py
 ```
 
-A instalação das bibliotecas normalmente requer internet; depois de instaladas, a partida local funciona sem conexão externa. Mantenha a pasta `sound` junto aos arquivos do projeto. Os sons são localizados a partir de `som.py`, independentemente da pasta em que o terminal foi aberto.
+A instalação das bibliotecas normalmente requer internet; depois de instaladas, a partida local funciona sem conexão externa. Mantenha a pasta `sound` junto aos arquivos do projeto. Os sons são localizados a partir do catálogo `audio.py`, independentemente da pasta em que o terminal foi aberto.
 
-A limpeza de tela utiliza o comando adequado ao sistema. O alinhamento de alguns emojis ainda depende do terminal e da fonte. A navegação por Esc foi testada em pseudo-terminal Linux; a leitura no Windows possui teste simulado, mas ainda precisa de confirmação em uma máquina Windows. O modo local com áudio pode falhar em ambientes sem dispositivo de som. Para executar sem áudio no Linux, use `RPG_SEM_SOM=1 .venv/bin/python main.py`. Servidor e clientes de rede não abrem áudio.
+A limpeza de tela utiliza o comando adequado ao sistema. O alinhamento de alguns emojis ainda depende do terminal e da fonte. A navegação por Esc foi testada em pseudo-terminal Linux; a leitura no Windows possui teste simulado, mas ainda precisa de confirmação em uma máquina Windows. O modo local com áudio pode falhar em ambientes sem dispositivo de som. Para executar sem áudio no Linux, use `RPG_SEM_SOM=1 .venv/bin/python main.py`. O servidor de rede não abre áudio; cada cliente reproduz os efeitos localmente.
 
 ## 🎮 Regras do jogo atual
 
@@ -132,6 +132,14 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-rede.txt
 ```
 
+Para ouvir os efeitos, instale também em **cada computador cliente**:
+
+```bash
+.venv/bin/python -m pip install -r requirements-audio.txt
+```
+
+O áudio vem habilitado por padrão. Para jogar sem ele, acrescente `--sem-som` ao comando do cliente. Se Pygame, os arquivos ou o dispositivo de áudio estiverem indisponíveis, o cliente avisa e continua a partida. Mantenha a pasta `sound` junto ao projeto nos dois computadores.
+
 Se já tem `.venv`, use-a. Se `venv` não estiver disponível, instale o pacote de ambiente virtual da sua distribuição. Transfira o projeto para o outro computador sem copiar `.venv`.
 
 **2. No seu computador, terminal 1 — servidor:**
@@ -190,7 +198,7 @@ Essa regra só é necessária quando o firewall bloqueia a conexão. Não config
 
 ```powershell
 py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-rede.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements-rede.txt -r requirements-audio.txt
 .\.venv\Scripts\python.exe cliente.py --host IP_DO_SERVIDOR --port 5000 --nome Convidado
 ```
 
@@ -203,7 +211,8 @@ O servidor também pode ser iniciado pelo mesmo Python no Windows. A implementa�
 - `rede/protocolo.py`: TCP + JSONL UTF-8, buffer persistente para fragmentação e limite de 64 KiB por mensagem.
 - `rede/servidor_tcp.py`: lobby, IDs estáveis, perguntas com ID, timeout e validação da conexão autorizada. Somente o motor modifica a partida; threads de rede recebem respostas.
 - `rede/terminal_remoto.py`: renderiza as tabelas/painéis Rich originais e envia as mesmas telas públicas aos clientes.
-- `rede/cliente_tcp.py`: exibe telas e envia entradas; não importa regras, sorteia dados nem altera atributos.
+- `rede/cliente_tcp.py`: exibe telas, reproduz os efeitos indicados pelo servidor e envia entradas; não importa regras, sorteia dados nem altera atributos.
+- `audio.py` e `rede/audio_cliente.py`: catálogo dos sons existentes e reprodução local opcional com Pygame. `som.py` usa o mesmo catálogo e encaminha os efeitos ao adaptador remoto quando está no servidor.
 
 Para integrar funções novas do projeto original, use `interface.io.print`, `perguntar`, `pausa` e `limpar` em vez de acesso direto ao terminal. Os menus numéricos podem continuar usando `interface.teclado.ler_opcao`. Perguntas de eventos destinadas a outra pessoa devem passar `jogador=...` para `perguntar`. Use `privado(jogador)` para detalhes do inventário e `anunciar(...)` para a ação pública. Não há substituição global de `input` ou `print`.
 
@@ -212,10 +221,10 @@ Loja, inventário, venda, equipamentos, poções e eventos usam as regras existe
 ### Limitações do MVP
 
 - Uma sala por processo; participantes entram antes de começar. Sem reconexão ou entrada tardia. Desconexão, timeout ou interrupção do servidor cancela a sessão.
-- Sem efeitos sonoros em rede; áudio permanece no modo local.
+- Efeitos sonoros em rede são reproduzidos localmente: o servidor escolhe a variação e envia nome, operação e volume. Sons públicos chegam a todos; sons de telas privadas chegam somente ao dono. A latência da rede pode causar pequenas diferenças no instante da reprodução.
 - A largura das telas públicas é a menor largura informada pelos clientes (40–160 colunas). `--largura 120` permite fixá-la; mantenha os terminais com pelo menos essa largura. Caracteres e emojis são preservados, mas sua aparência depende da fonte e do terminal.
 - Detalhes privados e perguntas destinadas a um jogador diferem por permissão; o restante da interface é compartilhado.
-- O cliente usa o mesmo repositório por praticidade. Para distribuir só o cliente, bastam `cliente.py`, `requirements-rede.txt`, `interface/{__init__,teclado,io}.py` e `rede/{__init__,cliente_tcp,protocolo}.py`, preservando as pastas.
+- O cliente usa o mesmo repositório por praticidade. Para distribuir só o cliente, bastam `cliente.py`, `audio.py`, `requirements-rede.txt`, `interface/{__init__,teclado,io}.py` e `rede/{__init__,cliente_tcp,protocolo,audio_cliente}.py`. Para áudio, inclua também `sound/` e `requirements-audio.txt`, preservando as pastas.
 
 ## 🧪 Testes e pendências
 
@@ -231,7 +240,7 @@ Execute os testes na raiz, usando o ambiente virtual:
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Os testes verificam poções, compra e venda, duração por rodada, Esc e restauração do terminal, framing JSONL, envio concorrente, partidas TCP completas com dois e três clientes, turnos após eliminações, igualdade de telas públicas, privacidade, rejeição de entradas fora da vez/antigas, timeout e desconexão. Também executam `servidor.py` e dois processos de `cliente.py`, além de verificar a restauração do teclado de um cliente em pseudo-terminal Linux após desconexão. O áudio é substituído nos testes; eles não confirmam os sons. O teste de pseudo-terminal Unix é ignorado no Windows. Testes TCP precisam de permissão para abrir sockets locais.
+Os testes verificam poções, compra e venda, duração por rodada, Esc e restauração do terminal, framing JSONL, envio concorrente, partidas TCP completas com dois e três clientes, turnos após eliminações, igualdade de telas públicas, privacidade, rejeição de entradas fora da vez/antigas, timeout e desconexão. Também executam `servidor.py` e dois processos de `cliente.py`, além de verificar a restauração do teclado de um cliente em pseudo-terminal Linux após desconexão. Testes de áudio verificam encaminhamento, privacidade, volume, parada, cache, desativação e falhas sem interromper o jogo. A reprodução em alto-falantes precisa ser confirmada nas máquinas dos jogadores. O teste de pseudo-terminal Unix é ignorado no Windows. Testes TCP precisam de permissão para abrir sockets locais.
 
 Pendências conhecidas:
 
@@ -239,7 +248,7 @@ Pendências conhecidas:
 - Alinhamento visual de emojis depende do terminal e da fonte.
 - Execução completa e teclado precisam ser confirmados em uma máquina Windows.
 - Balanceamento das poções e economia precisa de acompanhamento em partidas reais.
-- `requirements-rede.txt` registra Rich; o modo local ainda instala Pygame separadamente.
+- `requirements-rede.txt` registra Rich e `requirements-audio.txt` registra Pygame opcional nos clientes.
 
 ## 📸 Referências visuais e projeto original
 

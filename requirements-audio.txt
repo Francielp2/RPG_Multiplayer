@@ -1,0 +1,2 @@
+# Opcional para clientes de rede; obrigatório para o modo local com áudio.
+pygame>=2.6,<3

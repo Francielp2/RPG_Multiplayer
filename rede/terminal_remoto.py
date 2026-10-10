@@ -45,6 +45,10 @@ class TerminalRemoto:
     def anunciar(self, texto):
         self.servidor.enviar({"tipo": "aviso", "texto": texto})
 
+    def som(self, nome, acao, volume):
+        self.servidor.enviar({"tipo": "som", "nome": nome, "acao": acao,
+                             "volume": volume}, self.destinatario)
+
     @contextmanager
     def privado(self, jogador):
         anterior = self.destinatario

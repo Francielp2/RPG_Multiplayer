@@ -10,15 +10,17 @@ from rich.console import Console
 
 from interface.teclado import EntradaInterrompida, ler_opcao
 from rede.protocolo import CanalJSON, ErroProtocolo
+from rede.audio_cliente import AudioCliente
 
 
-def executar_cliente(host, porta, nome, largura):
+def executar_cliente(host, porta, nome, largura, som=True):
     conexao = socket.create_connection((host, porta), timeout=10)
     conexao.settimeout(1)
     canal = CanalJSON(conexao)
     fila = Queue()
     encerrado = Event()
     console = Console(highlight=False)
+    audio = AudioCliente(habilitado=som)
 
     def receber():
         while not encerrado.is_set():
@@ -48,6 +50,8 @@ def executar_cliente(host, porta, nome, largura):
             elif tipo == "tela":
                 # Rich adapta as cores para o console Windows e para saída redirecionada.
                 console.print(Text.from_ansi(mensagem["conteudo"]), end="", soft_wrap=True)
+            elif tipo == "som":
+                audio.executar(mensagem)
             elif tipo in ("aviso", "erro"):
                 print(mensagem["texto"])
             elif tipo == "bem_vindo":
@@ -69,5 +73,6 @@ def executar_cliente(host, porta, nome, largura):
     finally:
         encerrado.set()
         canal.fechar()
+        audio.fechar()
         if leitor.is_alive():
             leitor.join(timeout=2)

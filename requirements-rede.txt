@@ -1,2 +1,2 @@
-# Servidor e clientes não precisam de Pygame no MVP.
+# Para áudio nos clientes, instale também requirements-audio.txt.
 rich>=13,<15
