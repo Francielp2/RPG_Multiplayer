@@ -3,6 +3,7 @@ from rich import print
 
 import som
 from interface.funcoes import mostrar_mensagem
+from interface.teclado import ler_opcao
 from jogador import Jogador
 class Combate :
     def __init__(self,jog,jogadores,indice):
@@ -28,7 +29,10 @@ class Combate :
                 jogtabela.add_row("[red]-1[/]","[red]↩️ Voltar[/]","")
                 print(jogtabela)
                 try:
-                    ialvo =  int (input ("Escolha quem você vai atacar⚔️ : "))
+                    entrada = ler_opcao("Escolha quem você vai atacar⚔️ : ")
+                    if entrada is None:
+                        return False
+                    ialvo = int(entrada)
                     if ialvo == -1 :
                         return False
                     if ialvo == self.indice :

@@ -4,6 +4,7 @@ from rich import print
 
 import som
 from interface.funcoes import mostrar_mensagem
+from interface.teclado import ler_opcao
 from jogador import Jogador
 class Partida :
     def __init__(self,jogadores:list[Jogador]):
@@ -86,7 +87,10 @@ class Partida :
         opc = None
         while opc != -1:
             try :
-                opc = int (input(mensagem))
+                entrada = ler_opcao(mensagem)
+                if entrada is None:
+                    return None
+                opc = int(entrada)
                 if opc == -1 :
                     return None
                 if opc >=0 and opc < fim :

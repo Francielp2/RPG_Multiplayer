@@ -169,6 +169,27 @@ class TestPocoes(unittest.TestCase):
         self.assertEqual(self.jog.inventario, [])
         self.assertEqual(self.jog.moedas, 1)
 
+    def test_esc_volta_sem_comprar_vender_ou_atacar(self):
+        from combate import Combate
+
+        pocao = Pocao("forca")
+        self.jog.inventario = [pocao]
+        loja = Loja()
+        loja.estoque = [pocao]
+        self.jog.moedas = 10
+        with patch("loja.loja.ler_opcao", return_value=None):
+            self.assertIsNone(loja.compra(self.jog))
+        with patch("partida.partida.ler_opcao", side_effect=["0", None, None]), \
+                patch("jogador.jogador.print"):
+            self.jog.mostrar_inventario()
+        combate = Combate(self.jog, [self.jog, Jogador("B", 100), Jogador("C", 100)], 0)
+        with patch("combate.combate.ler_opcao", return_value=None), patch("combate.combate.print"):
+            self.assertFalse(combate.escolher_alvo())
+        self.assertEqual(self.jog.moedas, 10)
+        self.assertEqual(self.jog.inventario, [pocao])
+        self.assertEqual(loja.estoque, [pocao])
+        self.assertEqual(self.jog.efeitos_pocoes, {})
+
     def test_tabelas_mostram_pocoes_e_rodadas(self):
         loja = Loja()
         loja.estoque = [Pocao(tipo, "épico") for tipo in Pocao.nomes]

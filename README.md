@@ -155,6 +155,11 @@ Você pode baixar todos os arquivos clicando em Code e baixando o zip, depois é
 
 ## 🧪 Poções
 
+`Esc` volta na loja, inventário, ações de itens e seleção de alvo; no menu
+principal, apenas cancela a entrada. Todas as opções numéricas continuam
+usando Enter. As telas são as mesmas. Em entrada redirecionada ou consoles sem TTY,
+é mantida a entrada tradicional com Enter.
+
 A loja tem uma tabela de poções de cura, agilidade, força e sorte. Cada novo
 item tem 15% de chance de ser uma poção. Compre e selecione a poção no
 inventário para usar ou vender; ela não ocupa um slot de equipamento.

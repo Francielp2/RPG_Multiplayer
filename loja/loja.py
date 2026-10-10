@@ -5,6 +5,7 @@ from equipamento.armadura import Armadura
 from equipamento.pocao import Pocao
 from equipamento import Equipamento
 from interface.funcoes import mostrar_mensagem, limpar_tela
+from interface.teclado import ler_opcao
 from jogador import Jogador
 from random import randint,random
 from time import sleep
@@ -128,7 +129,10 @@ class Loja:
     def compra(self, jog: Jogador):
         while True :
             try :
-                indice = int(input("sua opção : "))
+                entrada = ler_opcao("sua opção : ")
+                if entrada is None:
+                    return
+                indice = int(entrada)
                 if indice in (-3,-2,-1) : #comprar slot,att loja ou sair, é válido
                     break #valor válido, pode continuar
 
